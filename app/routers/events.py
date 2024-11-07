@@ -30,11 +30,17 @@ async def create_event(event: EventCreate, current_user = Depends(get_current_us
 
 @router.get("/", response_model=List[Event])
 async def list_events():
+    await prisma.connect()
 
-    return await prisma.event.find_many(include={
+    events = await prisma.event.find_many(include={
         "expert": True,
         "attendees": True
     })
+    await prisma.disconnect()
+
+    return events
+
+
 
 @router.post("/{event_id}/register")
 async def register_for_event(event_id: int, current_user = Depends(get_current_user)):
