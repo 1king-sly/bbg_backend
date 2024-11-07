@@ -23,6 +23,10 @@ class UserBase(BaseModel):
     lastPeriodDate: Optional[datetime] = None
     periodEndDate: Optional[datetime] = None
 
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
 class UserCreate(UserBase):
     password: str
 

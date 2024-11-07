@@ -1,17 +1,17 @@
 from datetime import timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from prisma import Prisma
-from app.src.models.schemas import UserCreate
+from db import prisma
+from app.src.models.schemas import UserLogin
+
 
 
 from app.src.auth.auth import create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES, verify_password
 
 router = APIRouter()
-prisma = Prisma()
 
 @router.post("/token")
-async def login_for_access_token(form_data: UserCreate = Depends()):
+async def login_for_access_token(form_data: UserLogin = Depends()):
 
     print(form_data.model_dump())
     user = await prisma.user.find_unique(where={"email": form_data.username})

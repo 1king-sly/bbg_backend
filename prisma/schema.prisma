@@ -1,19 +1,7 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
-generator client {
-  provider = "prisma-client-js"
+generator py {
+  provider             = "prisma-client-py"
+  recursive_type_depth = 5
 }
-
-// Only use `prisma-client-py` generator when not in Vercel's environment
-// generator python {
-//   provider = "prisma-client-py"
-//   binaryTargets = ["native"]
-//   enabled = env("USE_PRISMA_PY") == "true"
-// }
 
 datasource db {
   provider = "postgresql"
@@ -24,7 +12,7 @@ model User {
   id              Int              @id @default(autoincrement())
   email           String           @unique
   name            String?
-  role            Role             @default(ADMIN)
+  role            Role             @default(USER)
   phone           String?
   dateOfBirth     DateTime?
   isPregnant      Boolean          @default(false)
@@ -36,12 +24,13 @@ model User {
   periodEndDate   DateTime?
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
-  events          Event[]          @relation("Attendees")
+  password        String
+  certificates    Certificate[]
   enrollments     Enrollment[]
   menstrualCycles MenstrualCycle[]
   messages        Message[]        @relation("UserMessages")
   sessions        Session[]        @relation("UserSessions")
-  certificates    Certificate[]
+  events          Event[]          @relation("Attendees")
 }
 
 model Expert {
@@ -71,8 +60,8 @@ model Partner {
   isVerified  Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  events      Event[]  @relation("PartnerEvents")
   courses     Course[] @relation("PartnerCourses")
+  events      Event[]  @relation("PartnerEvents")
 }
 
 model Organization {
@@ -85,8 +74,8 @@ model Organization {
   isVerified  Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  events      Event[]  @relation("OrganizationEvents")
   courses     Course[] @relation("OrganizationCourses")
+  events      Event[]  @relation("OrganizationEvents")
 }
 
 model Event {
@@ -99,12 +88,12 @@ model Event {
   expertId       Int?
   partnerId      Int?
   organizationId Int?
-  expert         Expert?       @relation("ExpertEvents", fields: [expertId], references: [id])
-  partner        Partner?      @relation("PartnerEvents", fields: [partnerId], references: [id])
-  organization   Organization? @relation("OrganizationEvents", fields: [organizationId], references: [id])
-  attendees      User[]        @relation("Attendees")
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
+  expert         Expert?       @relation("ExpertEvents", fields: [expertId], references: [id])
+  organization   Organization? @relation("OrganizationEvents", fields: [organizationId], references: [id])
+  partner        Partner?      @relation("PartnerEvents", fields: [partnerId], references: [id])
+  attendees      User[]        @relation("Attendees")
 }
 
 model Course {
@@ -115,13 +104,13 @@ model Course {
   expertId       Int?
   partnerId      Int?
   organizationId Int?
-  expert         Expert?       @relation(fields: [expertId], references: [id])
-  partner        Partner?      @relation("PartnerCourses", fields: [partnerId], references: [id])
-  organization   Organization? @relation("OrganizationCourses", fields: [organizationId], references: [id])
-  modules        Module[]
-  enrollments    Enrollment[]
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
+  expert         Expert?       @relation(fields: [expertId], references: [id])
+  organization   Organization? @relation("OrganizationCourses", fields: [organizationId], references: [id])
+  partner        Partner?      @relation("PartnerCourses", fields: [partnerId], references: [id])
+  enrollments    Enrollment[]
+  modules        Module[]
 }
 
 model Module {
@@ -131,10 +120,10 @@ model Module {
   videoUrl  String?
   order     Int
   courseId  Int
-  course    Course     @relation(fields: [courseId], references: [id])
-  progress  Progress[]
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
+  course    Course     @relation(fields: [courseId], references: [id])
+  progress  Progress[]
 }
 
 model Enrollment {
@@ -144,11 +133,11 @@ model Enrollment {
   status      String       @default("in_progress")
   progress    Int          @default(0)
   completedAt DateTime?
-  user        User         @relation(fields: [userId], references: [id])
-  course      Course       @relation(fields: [courseId], references: [id])
-  certificate Certificate?
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
+  certificate Certificate?
+  course      Course       @relation(fields: [courseId], references: [id])
+  user        User         @relation(fields: [userId], references: [id])
 }
 
 model Progress {
@@ -157,9 +146,9 @@ model Progress {
   moduleId  Int
   completed Boolean  @default(false)
   score     Int?
-  module    Module   @relation(fields: [moduleId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  module    Module   @relation(fields: [moduleId], references: [id])
 }
 
 model Certificate {
@@ -167,8 +156,8 @@ model Certificate {
   userId       Int
   enrollmentId Int        @unique
   issueDate    DateTime   @default(now())
-  user         User       @relation(fields: [userId], references: [id])
   enrollment   Enrollment @relation(fields: [enrollmentId], references: [id])
+  user         User       @relation(fields: [userId], references: [id])
 }
 
 model Session {
@@ -177,15 +166,15 @@ model Session {
   expertId  Int
   startTime DateTime
   endTime   DateTime?
-  status    String    @default("scheduled") // scheduled, ongoing, completed, cancelled
-  type      String // chat, video, audio
+  status    String    @default("scheduled")
+  type      String
   notes     String?
   rating    Int?
-  user      User      @relation("UserSessions", fields: [userId], references: [id])
-  expert    Expert    @relation("ExpertSessions", fields: [expertId], references: [id])
-  messages  Message[] @relation("SessionMessages")
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+  messages  Message[] @relation("SessionMessages")
+  expert    Expert    @relation("ExpertSessions", fields: [expertId], references: [id])
+  user      User      @relation("UserSessions", fields: [userId], references: [id])
 }
 
 model Message {
@@ -193,11 +182,11 @@ model Message {
   content   String
   senderId  Int
   sessionId Int?
-  status    String   @default("sent") // sent, delivered, read
-  sender    User     @relation("UserMessages", fields: [senderId], references: [id])
-  session   Session? @relation("SessionMessages", fields: [sessionId], references: [id])
+  status    String   @default("sent")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  sender    User     @relation("UserMessages", fields: [senderId], references: [id])
+  session   Session? @relation("SessionMessages", fields: [sessionId], references: [id])
 }
 
 model MenstrualCycle {
@@ -208,9 +197,9 @@ model MenstrualCycle {
   actualEndDate   DateTime?
   symptoms        String?
   notes           String?
-  user            User      @relation(fields: [userId], references: [id])
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
+  user            User      @relation(fields: [userId], references: [id])
 }
 
 enum Role {

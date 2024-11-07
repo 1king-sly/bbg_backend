@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.routers import users, experts, sessions, events, courses, enrollments, auth
 from prisma import Prisma
-
+from db import prisma, connect_db, disconnect_db
 app = FastAPI(title="BabyGal Backend API Routes")
 
 # CORS middleware configuration
@@ -28,14 +28,16 @@ app.include_router(courses.router, prefix="/api/courses", tags=["courses"])
 app.include_router(enrollments.router, prefix="/api/enrollments", tags=["enrollments"])
 
 # Database connection management
+# Connect to the database before the application starts
 @app.on_event("startup")
 async def startup():
-    await Prisma().connect()
+    await connect_db()
 
+# Disconnect from the database when the application stops
 @app.on_event("shutdown")
 async def shutdown():
-    await Prisma().disconnect()
+    await disconnect_db()
 
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+@app.get("/")
+async def root():
+    return {"message": "Hello From  Baby Gal"}
