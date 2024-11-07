@@ -4,10 +4,17 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
-generator py {
-  provider             = "prisma-client-py"
-  recursive_type_depth = 5
+generator client {
+  provider = "prisma-client-js"
 }
+
+// Only use `prisma-client-py` generator when not in Vercel's environment
+// generator python {
+//   provider = "prisma-client-py"
+//   binaryTargets = ["native"]
+//   enabled = env("USE_PRISMA_PY") == "true"
+// }
+
 
 datasource db {
   provider = "postgresql"
