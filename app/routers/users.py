@@ -32,6 +32,7 @@ async def create_user(user: UserIn):
                 "name": user.name,
                 "email": str(user.email),
                 'password':hashed_password,
+
             }
         )
 

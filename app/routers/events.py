@@ -9,10 +9,18 @@ prisma = Prisma()
 
 @router.post("/", response_model=Event)
 async def create_event(event: EventCreate, current_user = Depends(get_current_user)):
-    if current_user.role not in ["ADMIN", "EXPERT"]:
-        raise HTTPException(status_code=403, detail="Not authorized")
+    print(event.model_dump())
+
+
     
     try:
+
+        await prisma.connect()
+
+        if current_user.role not in ["ADMIN", "EXPERT"]:
+            raise HTTPException(status_code=403, detail="Not authorized")
+
+
         db_event = await prisma.event.create(
             data = event.model_dump()
         )
@@ -22,6 +30,7 @@ async def create_event(event: EventCreate, current_user = Depends(get_current_us
 
 @router.get("/", response_model=List[Event])
 async def list_events():
+
     return await prisma.event.find_many(include={
         "expert": True,
         "attendees": True
@@ -29,6 +38,8 @@ async def list_events():
 
 @router.post("/{event_id}/register")
 async def register_for_event(event_id: int, current_user = Depends(get_current_user)):
+    await prisma.connect()
+
     event = await prisma.event.find_unique(where={"id": event_id})
     if not event:
         raise HTTPException(status_code=404, detail="Event not found")
@@ -68,6 +79,8 @@ async def update_event(
         event_update: EventUpdate,
         current_user=Depends(get_current_user)
 ):
+    await prisma.connect()
+
     event = await prisma.event.find_unique(where={"id": event_id})
     if not event:
         raise HTTPException(status_code=404, detail="Event not found")

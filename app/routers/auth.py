@@ -11,8 +11,8 @@ from app.src.auth.auth import create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES, 
 router = APIRouter()
 
 @router.post("/token")
-async def login_for_access_token(form_data: UserLogin = Depends()):
-
+async def login_for_access_token(form_data: UserLogin):
+    print(form_data.model_dump())
     user = await prisma.user.find_unique(where={"email": form_data.email})
     if not user or not verify_password(form_data.password, user.password):
         raise HTTPException(
