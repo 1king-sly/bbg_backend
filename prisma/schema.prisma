@@ -25,40 +25,110 @@ model User {
   email           String           @unique
   name            String?
   role            Role             @default(USER)
+  phone           String?
+  dateOfBirth     DateTime?
+  isPregnant      Boolean          @default(false)
+  pregnancyDate   DateTime?
+  hasChild        Boolean          @default(false)
+  childBirthDate  DateTime?
+  childGender     String?
+  lastPeriodDate  DateTime?
+  periodEndDate   DateTime?
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
-  events          Event[]
+  events          Event[]          @relation("Attendees")
   enrollments     Enrollment[]
   menstrualCycles MenstrualCycle[]
-  messages        Message[]
+  messages        Message[]        @relation("UserMessages")
+  sessions        Session[]        @relation("UserSessions")
+  certificates    Certificate[]
+}
+
+model Expert {
+  id               Int       @id @default(autoincrement())
+  name             String
+  email            String    @unique
+  phone            String
+  password         String
+  fieldOfExpertise String
+  bio              String?
+  rating           Float     @default(0)
+  isVerified       Boolean   @default(false)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  courses          Course[]
+  events           Event[]   @relation("ExpertEvents")
+  sessions         Session[] @relation("ExpertSessions")
+}
+
+model Partner {
+  id          Int      @id @default(autoincrement())
+  name        String
+  email       String   @unique
+  phone       String
+  description String?
+  website     String?
+  isVerified  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  events      Event[]  @relation("PartnerEvents")
+  courses     Course[] @relation("PartnerCourses")
+}
+
+model Organization {
+  id          Int      @id @default(autoincrement())
+  name        String
+  email       String   @unique
+  phone       String
+  description String?
+  website     String?
+  isVerified  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  events      Event[]  @relation("OrganizationEvents")
+  courses     Course[] @relation("OrganizationCourses")
 }
 
 model Event {
-  id          Int      @id @default(autoincrement())
-  title       String
-  description String
-  date        DateTime
-  location    String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  attendees   User[]
+  id             Int           @id @default(autoincrement())
+  title          String
+  description    String
+  date           DateTime
+  location       String
+  maxAttendees   Int?
+  expertId       Int?
+  partnerId      Int?
+  organizationId Int?
+  expert         Expert?       @relation("ExpertEvents", fields: [expertId], references: [id])
+  partner        Partner?      @relation("PartnerEvents", fields: [partnerId], references: [id])
+  organization   Organization? @relation("OrganizationEvents", fields: [organizationId], references: [id])
+  attendees      User[]        @relation("Attendees")
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 }
 
 model Course {
-  id          Int          @id @default(autoincrement())
-  title       String
-  description String
-  category    String
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  modules     Module[]
-  enrollments Enrollment[]
+  id             Int           @id @default(autoincrement())
+  title          String
+  description    String
+  category       String
+  expertId       Int?
+  partnerId      Int?
+  organizationId Int?
+  expert         Expert?       @relation(fields: [expertId], references: [id])
+  partner        Partner?      @relation("PartnerCourses", fields: [partnerId], references: [id])
+  organization   Organization? @relation("OrganizationCourses", fields: [organizationId], references: [id])
+  modules        Module[]
+  enrollments    Enrollment[]
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 }
 
 model Module {
   id        Int        @id @default(autoincrement())
   title     String
   content   String
+  videoUrl  String?
   order     Int
   courseId  Int
   course    Course     @relation(fields: [courseId], references: [id])
@@ -68,15 +138,17 @@ model Module {
 }
 
 model Enrollment {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  courseId  Int
-  status    String   @default("in_progress")
-  progress  Int      @default(0)
-  user      User     @relation(fields: [userId], references: [id])
-  course    Course   @relation(fields: [courseId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          Int          @id @default(autoincrement())
+  userId      Int
+  courseId    Int
+  status      String       @default("in_progress")
+  progress    Int          @default(0)
+  completedAt DateTime?
+  user        User         @relation(fields: [userId], references: [id])
+  course      Course       @relation(fields: [courseId], references: [id])
+  certificate Certificate?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 }
 
 model Progress {
@@ -90,45 +162,61 @@ model Progress {
   updatedAt DateTime @updatedAt
 }
 
-model MenstrualCycle {
-  id              Int      @id @default(autoincrement())
-  userId          Int
-  startDate       DateTime
-  expectedEndDate DateTime
-  user            User     @relation(fields: [userId], references: [id])
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+model Certificate {
+  id           Int        @id @default(autoincrement())
+  userId       Int
+  enrollmentId Int        @unique
+  issueDate    DateTime   @default(now())
+  user         User       @relation(fields: [userId], references: [id])
+  enrollment   Enrollment @relation(fields: [enrollmentId], references: [id])
+}
+
+model Session {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  expertId  Int
+  startTime DateTime
+  endTime   DateTime?
+  status    String    @default("scheduled") // scheduled, ongoing, completed, cancelled
+  type      String // chat, video, audio
+  notes     String?
+  rating    Int?
+  user      User      @relation("UserSessions", fields: [userId], references: [id])
+  expert    Expert    @relation("ExpertSessions", fields: [expertId], references: [id])
+  messages  Message[] @relation("SessionMessages")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model Message {
-  id         Int      @id @default(autoincrement())
-  content    String
-  senderId   Int
-  receiverId Int
-  status     String   @default("sent")
-  sender     User     @relation(fields: [senderId], references: [id])
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id        Int      @id @default(autoincrement())
+  content   String
+  senderId  Int
+  sessionId Int?
+  status    String   @default("sent") // sent, delivered, read
+  sender    User     @relation("UserMessages", fields: [senderId], references: [id])
+  session   Session? @relation("SessionMessages", fields: [sessionId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-model Testimonial {
-  id         Int      @id @default(autoincrement())
-  name       String
-  occupation String
-  text       String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-}
-
-model Service {
-  id          Int      @id @default(autoincrement())
-  title       String
-  description String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+model MenstrualCycle {
+  id              Int       @id @default(autoincrement())
+  userId          Int
+  startDate       DateTime
+  expectedEndDate DateTime
+  actualEndDate   DateTime?
+  symptoms        String?
+  notes           String?
+  user            User      @relation(fields: [userId], references: [id])
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 }
 
 enum Role {
   USER
   ADMIN
+  EXPERT
+  PARTNER
+  ORGANIZATION
 }
