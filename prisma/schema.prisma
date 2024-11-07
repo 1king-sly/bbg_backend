@@ -15,7 +15,6 @@ generator client {
 //   enabled = env("USE_PRISMA_PY") == "true"
 // }
 
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")

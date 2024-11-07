@@ -1,5 +1,6 @@
 from typing import List
-from pydantic import BaseSettings, AnyHttpUrl
+from pydantic import  AnyHttpUrl
+from pydantic_settings import BaseSettings
 from decouple import config
 
 class Settings(BaseSettings):
@@ -8,8 +9,8 @@ class Settings(BaseSettings):
     
     # CORS Configuration
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = [
-        "http://localhost:3000",  # React frontend
-        "http://localhost:8000",  # FastAPI backend
+        "http://localhost:3000",
+        "http://localhost:8000",
     ]
     
     # Database Configuration
@@ -24,8 +25,8 @@ class Settings(BaseSettings):
     SMTP_TLS: bool = True
     SMTP_PORT: int = 587
     SMTP_HOST: str = "smtp.gmail.com"
-    SMTP_USER: str = config("SMTP_USER", cast=str)
-    SMTP_PASSWORD: str = config("SMTP_PASSWORD", cast=str)
+    SMTP_USER: str = config("SMTP_USER",default="default@example.com", cast=str)
+    SMTP_PASSWORD: str = config("SMTP_PASSWORD",default="default@example.com", cast=str)
     
     class Config:
         case_sensitive = True

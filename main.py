@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import users, experts, partners, organizations, courses, events, sessions, auth
+from app.routers import users, experts, partners, organizations, courses, events, sessions, auth_router
 from app.core.config import settings
 from db import prisma, connect_db, disconnect_db
 app = FastAPI(
@@ -18,7 +18,7 @@ app.add_middleware(
 )
 
 # Include routers
-app.include_router(auth.router, prefix=settings.API_V1_STR)
+app.include_router(auth_router.router, prefix=settings.API_V1_STR)
 app.include_router(users.router, prefix=settings.API_V1_STR)
 app.include_router(experts.router, prefix=settings.API_V1_STR)
 app.include_router(partners.router, prefix=settings.API_V1_STR)
