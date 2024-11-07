@@ -24,7 +24,7 @@ model User {
   id              Int              @id @default(autoincrement())
   email           String           @unique
   name            String?
-  role            Role             @default(USER)
+  role            Role             @default(ADMIN)
   phone           String?
   dateOfBirth     DateTime?
   isPregnant      Boolean          @default(false)

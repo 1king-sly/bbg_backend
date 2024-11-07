@@ -1,43 +1,41 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import users, experts, partners, organizations, courses, events, sessions, auth_router
-from app.core.config import settings
-from db import prisma, connect_db, disconnect_db
-app = FastAPI(
-    title=settings.PROJECT_NAME,
-    openapi_url=f"{settings.API_V1_STR}/openapi.json"
-)
+from fastapi.staticfiles import StaticFiles
+from app.routers import users, experts, sessions, events, courses, enrollments, auth
+from prisma import Prisma
 
-# Set up CORS middleware
+app = FastAPI(title="BabyGal Backend API")
+
+# CORS middleware configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.BACKEND_CORS_ORIGINS,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Include routers
-app.include_router(auth_router.router, prefix=settings.API_V1_STR)
-app.include_router(users.router, prefix=settings.API_V1_STR)
-app.include_router(experts.router, prefix=settings.API_V1_STR)
-app.include_router(partners.router, prefix=settings.API_V1_STR)
-app.include_router(organizations.router, prefix=settings.API_V1_STR)
-app.include_router(courses.router, prefix=settings.API_V1_STR)
-app.include_router(events.router, prefix=settings.API_V1_STR)
-app.include_router(sessions.router, prefix=settings.API_V1_STR)
+# Mount static files
+# app.mount("/templates", StaticFiles(directory="templates"), name="templates")
 
+# Include all routers
+app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
+app.include_router(users.router, prefix="/api/users", tags=["users"])
+app.include_router(experts.router, prefix="/api/experts", tags=["experts"])
+app.include_router(sessions.router, prefix="/api/sessions", tags=["sessions"])
+app.include_router(events.router, prefix="/api/events", tags=["events"])
+app.include_router(courses.router, prefix="/api/courses", tags=["courses"])
+app.include_router(enrollments.router, prefix="/api/enrollments", tags=["enrollments"])
 
-# Connect to the database before the application starts
+# Database connection management
 @app.on_event("startup")
 async def startup():
-    await connect_db()
+    await Prisma().connect()
 
-# Disconnect from the database when the application stops
 @app.on_event("shutdown")
 async def shutdown():
-    await disconnect_db()
+    await Prisma().disconnect()
 
-@app.get("/")
-async def root():
-    return {"message": "Welcome to BabyGal NGO API"}
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
