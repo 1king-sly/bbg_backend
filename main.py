@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from app.routers import users, experts, sessions, events, courses, enrollments, auth
 from prisma import Prisma
 
-app = FastAPI(title="BabyGal Backend API")
+app = FastAPI(title="BabyGal Backend API Routes")
 
 # CORS middleware configuration
 app.add_middleware(

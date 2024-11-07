@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException
 from app.src.auth.auth import get_current_user, get_password_hash
-from app.src.models.schemas import UserCreate, User, UserUpdate
+from app.src.models.schemas import UserCreate, User, UserUpdate, UserIn
 from prisma import Prisma
 
 router = APIRouter()
 prisma = Prisma()
 
 @router.post("/", response_model=User)
-async def create_user(user: UserCreate):
+async def create_user(user: UserIn):
     # print(user.model_dump(exclude_unset=True))
     hashed_password = get_password_hash(user.password)
     try:

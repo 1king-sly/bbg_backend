@@ -35,6 +35,11 @@ class User(UserBase):
     class Config:
         from_attributes = True
 
+class UserIn(BaseModel):
+    name:str
+    email:EmailStr
+    password:str
+
 class ExpertBase(BaseModel):
     name: str
     email: EmailStr
