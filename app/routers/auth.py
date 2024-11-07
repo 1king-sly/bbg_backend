@@ -13,8 +13,7 @@ router = APIRouter()
 @router.post("/token")
 async def login_for_access_token(form_data: UserLogin = Depends()):
 
-    print(form_data.model_dump())
-    user = await prisma.user.find_unique(where={"email": form_data.username})
+    user = await prisma.user.find_unique(where={"email": form_data.email})
     if not user or not verify_password(form_data.password, user.password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
