@@ -57,10 +57,11 @@ class ExpertCreate(ExpertBase):
     password: str
 
 class Expert(ExpertBase):
-    id: int
+    id:int
     rating: float = 0.0
-    createdAt: datetime
-    updatedAt: datetime
+    coursesCreated: int = 0
+    eventsCreated: int = 0
+    sessionsHeld: int = 0
 
     class Config:
         from_attributes = True

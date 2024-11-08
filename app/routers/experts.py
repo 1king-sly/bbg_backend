@@ -22,7 +22,23 @@ async def create_expert(expert: ExpertCreate, current_user = Depends(get_current
 
 @router.get("/", response_model=List[Expert])
 async def list_experts():
-    return await prisma.expert.find_many()
+    experts = await prisma.expert.find_many(
+        include={
+            'courses': True,
+            'events': True,
+            'sessions': True,
+        }
+    )
+
+    expert_list = []
+    for expert in experts:
+        expert_dict = expert.dict()
+        expert_dict['coursesCreated'] = len(expert.courses)
+        expert_dict['eventsCreated'] = len(expert.events)
+        expert_dict['sessionsHeld'] = len(expert.sessions)
+        expert_list.append(expert_dict)
+
+    return expert_list
 
 @router.get("/{expert_id}", response_model=Expert)
 async def read_expert(expert_id: int):
@@ -34,7 +50,7 @@ async def read_expert(expert_id: int):
 @router.put("/{expert_id}", response_model=Expert)
 async def update_expert(
     expert_id: int,
-    expert_update: ExpertUpdate,
+    expert_update: ExpertBase,
     current_user = Depends(get_current_user)
 ):
     if current_user.role != "ADMIN":
