@@ -4,5 +4,10 @@
   },
   "devDependencies": {
     "prisma": "^5.17.0"
-  }
+  },
+  "scripts": {
+  "build": "next build",
+  "postinstall": "prisma generate"
+}
+
 }
