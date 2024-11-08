@@ -6,10 +6,7 @@
     "prisma": "^5.17.0"
   },
   "scripts": {
-  "build": "next build",
-  "postinstall": "prisma generate",
-    "prisma:generate": "prisma generate",
-  "prisma:migrate": "prisma migrate dev"
-}
+"postinstall": "prisma generate"
+  }
 
 }
