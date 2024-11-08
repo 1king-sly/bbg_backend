@@ -1,6 +1,6 @@
 generator py {
   provider             = "prisma-client-py"
-  recursive_type_depth = 5
+  recursive_type_depth = "5"
 }
 
 datasource db {
@@ -55,12 +55,12 @@ model Partner {
   name        String
   email       String   @unique
   phone       String
-  password    String
   description String?
   website     String?
   isVerified  Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  password    String
   courses     Course[] @relation("PartnerCourses")
   events      Event[]  @relation("PartnerEvents")
 }
@@ -70,12 +70,12 @@ model Organization {
   name        String
   email       String   @unique
   phone       String
-  password    String
   description String?
   website     String?
   isVerified  Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  password    String
   courses     Course[] @relation("OrganizationCourses")
   events      Event[]  @relation("OrganizationEvents")
 }

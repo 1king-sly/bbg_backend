@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from typing import List, Annotated
-from app.src.auth.auth import get_current_user
+from app.src.auth.auth import get_current_user,get_password_hash
 from app.src.models.schemas import  PartnerIn, Partner, PartnerOut
 from db import prisma
 
@@ -13,8 +13,19 @@ async def create_partner(partner: PartnerIn, current_user=Depends(get_current_us
         raise HTTPException(status_code=403, detail="Not authorized")
 
     try:
+        hashed_password = get_password_hash(partner.password)
+
         db_partner = await prisma.partner.create(
-            data=partner.model_dump()
+            data={
+                "name": partner.name,
+                "email": str(partner.email),
+                'password': hashed_password,
+                "phone":partner.phone,
+                "description": partner.description,
+                "website": partner.website,
+                "isVerified": partner.isVerified,
+
+            }
         )
         return db_partner
     except Exception as e:

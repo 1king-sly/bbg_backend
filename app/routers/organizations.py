@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from typing import List, Annotated
-from app.src.auth.auth import get_current_user
+from app.src.auth.auth import get_current_user,get_password_hash
 from app.src.models.schemas import  OrganizationIn, Organization, OrganizationOut
 from db import prisma
 
@@ -13,8 +13,19 @@ async def create_organization(organization: OrganizationIn, current_user=Depends
         raise HTTPException(status_code=403, detail="Not authorized")
 
     try:
+        hashed_password = get_password_hash(organization.password)
+
         db_partner = await prisma.organization.create(
-            data=organization.model_dump()
+            data={
+                "name": organization.name,
+                "email": str(organization.email),
+                'password': hashed_password,
+                "phone": organization.phone,
+                "description": organization.description,
+                "website": organization.website,
+                "isVerified": organization.isVerified,
+
+            }
         )
         return db_partner
     except Exception as e:

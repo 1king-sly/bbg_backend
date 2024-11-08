@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from typing import List,Annotated
-from app.src.auth.auth import get_current_user
+from app.src.auth.auth import get_current_user,get_password_hash
 from app.src.models.schemas import ExpertCreate, Expert, ExpertUpdate,ExpertBase
 from db import prisma
 
@@ -13,8 +13,18 @@ async def create_expert(expert: ExpertCreate, current_user = Depends(get_current
         raise HTTPException(status_code=403, detail="Not authorized")
     
     try:
+        hashed_password = get_password_hash(expert.password)
         db_expert = await prisma.expert.create(
-            data =  expert.model_dump()
+            data={
+                "name": expert.name,
+                "email": str(expert.email),
+                'password': hashed_password,
+                "phone": expert.phone,
+                "description": expert.description,
+                "website": expert.website,
+                "isVerified": expert.isVerified,
+
+            }
         )
         return db_expert
     except Exception as e:
