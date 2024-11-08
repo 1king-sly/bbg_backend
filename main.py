@@ -3,8 +3,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.routers import users, experts, sessions, events, courses, enrollments, auth, partners, organizations
-from prisma import Prisma
 from db import prisma, connect_db, disconnect_db
+import subprocess
+
 app = FastAPI(title="BabyGal Backend API Routes")
 
 # CORS middleware configuration
@@ -33,6 +34,15 @@ app.include_router(enrollments.router, prefix="/api/enrollments", tags=["enrollm
 # Database connection management
 # Connect to the database before the application starts
 @app.on_event("startup")
+
+async def generate_prisma_client():
+    try:
+        subprocess.run(["prisma", "generate"], check=True)
+        print("Prisma client generated successfully.")
+    except subprocess.CalledProcessError as e:
+        print(f"Error generating Prisma client: {e}")
+
+
 async def startup():
     await connect_db()
 
