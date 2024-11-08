@@ -61,6 +61,20 @@ async def update_expert(
             where={"id": expert_id},
             data=expert_update.model_dump(exclude_unset=True)
         )
+
         return updated_expert
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.delete("/{expert_id}")
+async def delete_expert(expert_id: int, current_user=Depends(get_current_user)):
+    if current_user.role != "ADMIN":
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    try:
+        await prisma.expert.delete(where={"id": expert_id})
+        await prisma.disconnect()
+        return {"message": "Expert deleted successfully"}
+    except Exception:
+        raise HTTPException(status_code=404, detail="Expert not found")
