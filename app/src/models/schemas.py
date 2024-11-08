@@ -50,6 +50,8 @@ class ExpertBase(BaseModel):
     phone: str
     fieldOfExpertise: str
     bio: Optional[str] = None
+    isVerified: bool = False
+
 
 class ExpertCreate(ExpertBase):
     password: str
@@ -57,7 +59,6 @@ class ExpertCreate(ExpertBase):
 class Expert(ExpertBase):
     id: int
     rating: float = 0.0
-    isVerified: bool = False
     createdAt: datetime
     updatedAt: datetime
 

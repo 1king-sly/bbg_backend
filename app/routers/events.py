@@ -9,7 +9,6 @@ prisma = Prisma()
 
 @router.post("/", response_model=Event)
 async def create_event(event: EventCreate, current_user = Depends(get_current_user)):
-    print(event.model_dump())
 
 
     
@@ -28,6 +27,7 @@ async def create_event(event: EventCreate, current_user = Depends(get_current_us
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+
 @router.get("/", response_model=List[Event])
 async def list_events():
     await prisma.connect()
@@ -39,7 +39,28 @@ async def list_events():
     await prisma.disconnect()
 
     return events
+@router.get("/me", response_model=List[Event])
+async def list_events(current_user = Depends(get_current_user)):
 
+    if not current_user:
+        raise HTTPException(status_code=400, detail="User Does not exist")
+
+    if current_user.role not in ["ADMIN", "EXPERT"]:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    events = await prisma.event.find_many(
+        where={
+            'OR': [
+                {"expertId": current_user.id},
+                {"partnerId": current_user.id}
+            ]
+        },include={
+        "expert": True,
+        "attendees": True
+    })
+    await prisma.disconnect()
+
+    return events
 
 
 @router.post("/{event_id}/register")
