@@ -4,6 +4,13 @@
     {
       "src": "main.py",
       "use": "@vercel/python"
+    },
+    {
+      "src": "prisma/schema.prisma",
+      "use": "@prisma/cli",
+      "config": {
+        "enableBinaryTargets": ["rhel-openssl-1.0.x"]
+      }
     }
   ],
   "routes": [
@@ -11,5 +18,21 @@
       "src": "/(.*)",
       "dest": "/main.py"
     }
-  ]
+  ],
+  "env": {
+"DATABASE_URL":"postgres://default:B7kcmw1Osxar@ep-soft-dream-a4uhin59-pooler.us-east-1.aws.neon.tech:5432/verceldb?sslmode=require",
+    "SECRET_KEY":"4a443777b8ed4c99d52031d926d6eff35d2d05d90cd768a48828e6e357396a5a",
+
+"ALGORITHM" : "HS256",
+"ACCESS_TOKEN_EXPIRE_MINUTES" : "30",
+    "POSTGRES_URL":"postgres://default:B7kcmw1Osxar@ep-soft-dream-a4uhin59-pooler.us-east-1.aws.neon.tech:5432/verceldb?sslmode=require",
+"POSTGRES_PRISMA_URL":"postgres://default:B7kcmw1Osxar@ep-soft-dream-a4uhin59-pooler.us-east-1.aws.neon.tech:5432/verceldb?sslmode=require&pgbouncer=true&connect_timeout=15",
+"POSTGRES_URL_NO_SSL":"postgres://default:B7kcmw1Osxar@ep-soft-dream-a4uhin59-pooler.us-east-1.aws.neon.tech:5432/verceldb",
+"POSTGRES_URL_NON_POOLING":"postgres://default:B7kcmw1Osxar@ep-soft-dream-a4uhin59.us-east-1.aws.neon.tech:5432/verceldb?sslmode=require",
+"POSTGRES_USER":"default",
+"POSTGRES_HOST":"ep-soft-dream-a4uhin59-pooler.us-east-1.aws.neon.tech",
+"POSTGRES_PASSWORD":"B7kcmw1Osxar",
+"POSTGRES_DATABASE":"verceldb"
+
+  }
 }
