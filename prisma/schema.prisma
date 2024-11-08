@@ -55,6 +55,7 @@ model Partner {
   name        String
   email       String   @unique
   phone       String
+  password    String
   description String?
   website     String?
   isVerified  Boolean  @default(false)
@@ -69,6 +70,7 @@ model Organization {
   name        String
   email       String   @unique
   phone       String
+  password    String
   description String?
   website     String?
   isVerified  Boolean  @default(false)

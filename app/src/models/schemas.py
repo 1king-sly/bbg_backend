@@ -172,3 +172,40 @@ class ExpertUpdate(Expert):
 
 class SessionUpdate(Session):
     pass
+
+class Partner(BaseModel):
+    name:str
+    email:EmailStr
+    phone:str
+    description:str | None
+    website:str | None
+    isVerified:bool
+
+
+class PartnerIn(Partner):
+    password:str
+
+
+class PartnerOut(Partner):
+    id:int
+    coursesCreated:int
+    sessionsHeld:int
+    eventsCreated:int
+
+class Organization(BaseModel):
+    name: str
+    email: EmailStr
+    phone: str
+    description: str | None
+    website: str | None
+    isVerified: bool
+
+class OrganizationIn(Organization):
+    password:str
+
+
+class OrganizationOut(Organization):
+    id: int
+    coursesCreated: int
+    sessionsHeld: int
+    eventsCreated: int
