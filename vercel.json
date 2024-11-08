@@ -7,7 +7,7 @@
     },
     {
       "src": "prisma/schema.prisma",
-      "use": "@prisma/cli",
+      "use": "prisma",
       "config": {
         "enableBinaryTargets": ["rhel-openssl-1.0.x"]
       }

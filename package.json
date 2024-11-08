@@ -6,8 +6,10 @@
     "prisma": "^5.17.0"
   },
   "scripts": {
-  "build": "next build",
-  "postinstall": "prisma generate"
+  "build": "prisma install && npm run prisma:generate && prisma run prisma:migrate",
+  "postinstall": "prisma generate",
+    "prisma:generate": "prisma generate",
+  "prisma:migrate": "prisma migrate dev"
 }
 
 }
