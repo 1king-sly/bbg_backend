@@ -6,9 +6,18 @@ from db import prisma
 
 router = APIRouter()
 
+async def connect_db():
+    """Function to connect to the database"""
+    await prisma.connect()
+
+async def disconnect_db():
+    """Function to disconnect from the database"""
+    await prisma.disconnect()
+
 
 @router.post("/", response_model=ExpertBase)
 async def create_expert(expert: ExpertCreate, current_user = Depends(get_current_user)):
+    await connect_db()
     if current_user.role != "ADMIN":
         raise HTTPException(status_code=403, detail="Not authorized")
     
@@ -26,6 +35,7 @@ async def create_expert(expert: ExpertCreate, current_user = Depends(get_current
 
             }
         )
+        await disconnect_db()
         return db_expert
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

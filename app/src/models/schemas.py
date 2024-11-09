@@ -209,3 +209,8 @@ class OrganizationOut(Organization):
     coursesCreated: int
     sessionsHeld: int
     eventsCreated: int
+
+class ChatRequest(BaseModel):
+    message:str
+
+

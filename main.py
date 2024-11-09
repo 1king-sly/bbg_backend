@@ -1,10 +1,12 @@
-import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from app.routers import users, experts, sessions, events, courses, enrollments, auth, partners, organizations
-from db import prisma, connect_db, disconnect_db
+from app.routers import users, experts, sessions, events, courses, enrollments, auth, partners, organizations,chat
+from db import  connect_db, disconnect_db
 import subprocess
+
+from prisma import Prisma
+
+prisma = Prisma()
 
 app = FastAPI(title="BabyGal Backend API Routes")
 
@@ -17,10 +19,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mount static files
-# app.mount("/templates", StaticFiles(directory="templates"), name="templates")
 
-# Include all routers
 app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 app.include_router(users.router, prefix="/api/users", tags=["users"])
 app.include_router(experts.router, prefix="/api/experts", tags=["experts"])
@@ -28,12 +27,16 @@ app.include_router(sessions.router, prefix="/api/sessions", tags=["sessions"])
 app.include_router(events.router, prefix="/api/events", tags=["events"])
 app.include_router(courses.router, prefix="/api/courses", tags=["courses"])
 app.include_router(partners.router, prefix="/api/partners", tags=["Partners"])
-app.include_router(organizations.router, prefix="/api/organizations", tags=["Partners"])
+app.include_router(organizations.router, prefix="/api/organizations", tags=["Organizations"])
 app.include_router(enrollments.router, prefix="/api/enrollments", tags=["enrollments"])
 
-# Database connection management
-# Connect to the database before the application starts
+app.include_router(chat.router)
+
 @app.on_event("startup")
+
+async def startup():
+    await connect_db()
+
 
 async def generate_prisma_client():
     try:
@@ -43,8 +46,7 @@ async def generate_prisma_client():
         print(f"Error generating Prisma client: {e}")
 
 
-async def startup():
-    await connect_db()
+
 
 # Disconnect from the database when the application stops
 @app.on_event("shutdown")
@@ -53,6 +55,6 @@ async def shutdown():
 
 @app.get("/")
 async def root():
-    return {"message": "Hello From  Baby Gal"}
+    return {"message": "Hello From  Baby Gal Backend Team"}
 
 
