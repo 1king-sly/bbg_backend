@@ -36,7 +36,6 @@ async def create_user(user: UserIn):
             }
         )
 
-        print(db_user)
         return db_user
     except Exception as e:
         print(str(e))

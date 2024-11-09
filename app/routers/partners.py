@@ -15,7 +15,7 @@ async def create_partner(partner: PartnerIn, current_user=Depends(get_current_us
     try:
         hashed_password = get_password_hash(partner.password)
 
-        db_partner = await prisma.partner.create(
+        db_partner =  prisma.partner.create(
             data={
                 "name": partner.name,
                 "email": str(partner.email),
@@ -34,11 +34,11 @@ async def create_partner(partner: PartnerIn, current_user=Depends(get_current_us
 
 @router.get("/", response_model=List[PartnerOut])
 async def list_partners():
-    partners = await prisma.partner.find_many(
+    partners =  prisma.partner.find_many(
         include={
             'courses': True,
             'events': True,
-            'sessions': True,
+            # 'sessions': True,
         }
     )
 
@@ -47,7 +47,7 @@ async def list_partners():
         partner_dict = partner.dict()
         partner_dict['coursesCreated'] = len(partner.courses)
         partner_dict['eventsCreated'] = len(partner.events)
-        partner_dict['sessionsHeld'] = len(partner.sessions)
+        # partner_dict['sessionsHeld'] = len(partner.sessions)
         partner_list.append(partner_dict)
 
     return partner_list
@@ -55,7 +55,7 @@ async def list_partners():
 
 @router.get("/{partner_id}", response_model=Partner)
 async def read_partner(partner_id: int):
-    partner = await prisma.pertner.find_unique(where={"id": partner_id})
+    partner =  prisma.pertner.find_unique(where={"id": partner_id})
     if not partner:
         raise HTTPException(status_code=404, detail="Expert not found")
     return partner
@@ -71,7 +71,7 @@ async def update_partner(
         raise HTTPException(status_code=403, detail="Not authorized")
 
     try:
-        updated_partner = await prisma.partner.update(
+        updated_partner =  prisma.partner.update(
             where={"id": partner_id},
             data=partner_update.model_dump(exclude_unset=True)
         )

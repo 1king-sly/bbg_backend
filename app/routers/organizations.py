@@ -15,7 +15,7 @@ async def create_organization(organization: OrganizationIn, current_user=Depends
     try:
         hashed_password = get_password_hash(organization.password)
 
-        db_partner = await prisma.organization.create(
+        db_partner =  prisma.organization.create(
             data={
                 "name": organization.name,
                 "email": str(organization.email),
@@ -34,11 +34,11 @@ async def create_organization(organization: OrganizationIn, current_user=Depends
 
 @router.get("/", response_model=List[OrganizationOut])
 async def list_organizations():
-    organizations = await prisma.organization.find_many(
+    organizations =  prisma.organization.find_many(
         include={
             'courses': True,
             'events': True,
-            'sessions': True,
+            # 'sessions': True,
         }
     )
 
@@ -47,7 +47,7 @@ async def list_organizations():
         organization_dict = organization.dict()
         organization_dict['coursesCreated'] = len(organization.courses)
         organization_dict['eventsCreated'] = len(organization.events)
-        organization_dict['sessionsHeld'] = len(organization.sessions)
+        # organization_dict['sessionsHeld'] = len(organization.sessions)
         organization_dict.append(organization_dict)
 
     return organization_list
@@ -55,7 +55,7 @@ async def list_organizations():
 
 @router.get("/{organization_id}", response_model=Organization)
 async def read_partner(organization_id: int):
-    organization = await prisma.organization.find_unique(where={"id": organization_id})
+    organization =  prisma.organization.find_unique(where={"id": organization_id})
     if not organization:
         raise HTTPException(status_code=404, detail="Partner not found")
     return organization
@@ -71,7 +71,7 @@ async def update_organization(
         raise HTTPException(status_code=403, detail="Not authorized")
 
     try:
-        updated_partner = await prisma.organization.update(
+        updated_partner =  prisma.organization.update(
             where={"id": organization_id},
             data=organization_update.model_dump(exclude_unset=True)
         )

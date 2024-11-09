@@ -2,10 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from typing import List
 from app.src.auth.auth import get_current_user
 from app.src.models.schemas import EventCreate, Event, EventUpdate
-from prisma import Prisma
+from db import prisma
 
 router = APIRouter()
-prisma = Prisma()
 
 @router.post("/", response_model=Event)
 async def create_event(event: EventCreate, current_user = Depends(get_current_user)):
@@ -14,13 +13,12 @@ async def create_event(event: EventCreate, current_user = Depends(get_current_us
     
     try:
 
-        await prisma.connect()
 
         if current_user.role not in ["ADMIN", "EXPERT"]:
             raise HTTPException(status_code=403, detail="Not authorized")
 
 
-        db_event = await prisma.event.create(
+        db_event =  prisma.event.create(
             data = event.model_dump()
         )
         return db_event
@@ -30,13 +28,11 @@ async def create_event(event: EventCreate, current_user = Depends(get_current_us
 
 @router.get("/", response_model=List[Event])
 async def list_events():
-    await prisma.connect()
 
-    events = await prisma.event.find_many(include={
+    events =  prisma.event.find_many(include={
         "expert": True,
         "attendees": True
     })
-    await prisma.disconnect()
 
     return events
 @router.get("/me", response_model=List[Event])
@@ -48,7 +44,7 @@ async def list_events(current_user = Depends(get_current_user)):
     if current_user.role not in ["ADMIN", "EXPERT"]:
         raise HTTPException(status_code=403, detail="Not authorized")
 
-    events = await prisma.event.find_many(
+    events =  prisma.event.find_many(
         where={
             'OR': [
                 {"expertId": current_user.id},
@@ -58,21 +54,19 @@ async def list_events(current_user = Depends(get_current_user)):
         "expert": True,
         "attendees": True
     })
-    await prisma.disconnect()
 
     return events
 
 
 @router.post("/{event_id}/register")
 async def register_for_event(event_id: int, current_user = Depends(get_current_user)):
-    await prisma.connect()
 
-    event = await prisma.event.find_unique(where={"id": event_id})
+    event =  prisma.event.find_unique(where={"id": event_id})
     if not event:
         raise HTTPException(status_code=404, detail="Event not found")
 
     # Check if user is already registered
-    existing_registration = await prisma.event.find_first(
+    existing_registration =  prisma.event.find_first(
         where={
             "id": event_id,
             "attendees": {
@@ -106,9 +100,8 @@ async def update_event(
         event_update: EventUpdate,
         current_user=Depends(get_current_user)
 ):
-    await prisma.connect()
 
-    event = await prisma.event.find_unique(where={"id": event_id})
+    event =  prisma.event.find_unique(where={"id": event_id})
     if not event:
         raise HTTPException(status_code=404, detail="Event not found")
 

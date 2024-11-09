@@ -6,24 +6,17 @@ from db import prisma
 
 router = APIRouter()
 
-async def connect_db():
-    """Function to connect to the database"""
-    await prisma.connect()
 
-async def disconnect_db():
-    """Function to disconnect from the database"""
-    await prisma.disconnect()
 
 
 @router.post("/", response_model=ExpertBase)
 async def create_expert(expert: ExpertCreate, current_user = Depends(get_current_user)):
-    await connect_db()
     if current_user.role != "ADMIN":
         raise HTTPException(status_code=403, detail="Not authorized")
     
     try:
         hashed_password = get_password_hash(expert.password)
-        db_expert = await prisma.expert.create(
+        db_expert =  prisma.expert.create(
             data={
                 "name": expert.name,
                 "email": str(expert.email),
@@ -35,14 +28,13 @@ async def create_expert(expert: ExpertCreate, current_user = Depends(get_current
 
             }
         )
-        await disconnect_db()
         return db_expert
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
 @router.get("/", response_model=List[Expert])
 async def list_experts():
-    experts = await prisma.expert.find_many(
+    experts =  prisma.expert.find_many(
         include={
             'courses': True,
             'events': True,
@@ -62,7 +54,7 @@ async def list_experts():
 
 @router.get("/{expert_id}", response_model=Expert)
 async def read_expert(expert_id: int):
-    expert = await prisma.expert.find_unique(where={"id": expert_id})
+    expert =  prisma.expert.find_unique(where={"id": expert_id})
     if not expert:
         raise HTTPException(status_code=404, detail="Expert not found")
     return expert
@@ -77,7 +69,7 @@ async def update_expert(
         raise HTTPException(status_code=403, detail="Not authorized")
     
     try:
-        updated_expert = await prisma.expert.update(
+        updated_expert =  prisma.expert.update(
             where={"id": expert_id},
             data=expert_update.model_dump(exclude_unset=True)
         )
@@ -94,7 +86,6 @@ async def delete_expert(expert_id: int, current_user=Depends(get_current_user)):
 
     try:
         await prisma.expert.delete(where={"id": expert_id})
-        await prisma.disconnect()
         return {"message": "Expert deleted successfully"}
     except Exception:
         raise HTTPException(status_code=404, detail="Expert not found")

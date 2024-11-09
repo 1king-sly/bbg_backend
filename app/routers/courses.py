@@ -2,10 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
 from app.src.auth.auth import get_current_user
 from app.src.models.schemas import CourseCreate, Course, CourseUpdate
-from prisma import Prisma
+from db import prisma
 
 router = APIRouter()
-prisma = Prisma()
 
 @router.post("/", response_model=Course)
 async def create_course(course: CourseCreate, current_user = Depends(get_current_user)):
@@ -13,7 +12,7 @@ async def create_course(course: CourseCreate, current_user = Depends(get_current
         raise HTTPException(status_code=403, detail="Not authorized")
     
     try:
-        db_course = await prisma.course.create(
+        db_course =  prisma.course.create(
             data = course.model_dump()
         )
         return db_course
@@ -22,14 +21,14 @@ async def create_course(course: CourseCreate, current_user = Depends(get_current
 
 @router.get("/", response_model=List[Course])
 async def list_courses():
-    return await prisma.course.find_many(include={
+    return  prisma.course.find_many(include={
         "expert": True,
         "modules": True
     })
 
 @router.get("/{course_id}", response_model=Course)
 async def read_course(course_id: int):
-    course = await prisma.course.find_unique(
+    course =  prisma.course.find_unique(
         where={"id": course_id},
         include={
             "expert": True,
@@ -46,7 +45,7 @@ async def update_course(
     course_update: CourseUpdate,
     current_user = Depends(get_current_user)
 ):
-    course = await prisma.course.find_unique(where={"id": course_id})
+    course =  prisma.course.find_unique(where={"id": course_id})
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
     
@@ -54,7 +53,7 @@ async def update_course(
         raise HTTPException(status_code=403, detail="Not authorized")
     
     try:
-        updated_course = await prisma.course.update(
+        updated_course =  prisma.course.update(
             where={"id": course_id},
             data=course_update.dict(exclude_unset=True)
         )

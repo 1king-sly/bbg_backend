@@ -1,20 +1,19 @@
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from typing import List
 from app.src.auth.auth import get_current_user
 from app.src.models.schemas import SessionCreate, Session, SessionUpdate
-from prisma import Prisma
+from db import prisma
 
 router = APIRouter()
-prisma = Prisma()
 
 @router.post("/", response_model=Session)
 async def create_session(session: SessionCreate, current_user = Depends(get_current_user)):
     try:
-        db_session = await prisma.session.create({
+        db_session =  prisma.session.create({
             "data": {
-                **session.dict(),
+                **session.model_dump(),
                 "userId": current_user.id
             }
         })
@@ -26,12 +25,12 @@ async def create_session(session: SessionCreate, current_user = Depends(get_curr
 async def list_sessions(current_user = Depends(get_current_user)):
     # Users can see their sessions, experts can see sessions where they're the expert
     if current_user.role == "EXPERT":
-        return await prisma.session.find_many(
+        return  prisma.session.find_many(
             where={"expertId": current_user.id},
             include={"user": True}
         )
     else:
-        return await prisma.session.find_many(
+        return  prisma.session.find_many(
             where={"userId": current_user.id},
             include={"expert": True}
         )
@@ -42,7 +41,7 @@ async def update_session(
     session_update: SessionUpdate,
     current_user = Depends(get_current_user)
 ):
-    session = await prisma.session.find_unique(where={"id": session_id})
+    session =  prisma.session.find_unique(where={"id": session_id})
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
     
@@ -50,9 +49,9 @@ async def update_session(
         raise HTTPException(status_code=403, detail="Not authorized")
     
     try:
-        updated_session = await prisma.session.update(
+        updated_session =  prisma.session.update(
             where={"id": session_id},
-            data=session_update.dict(exclude_unset=True)
+            data=session_update.model_dump(exclude_unset=True)
         )
         return updated_session
     except Exception as e:
@@ -64,7 +63,7 @@ async def complete_session(
     rating: int = None,
     current_user = Depends(get_current_user)
 ):
-    session = await prisma.session.find_unique(where={"id": session_id})
+    session =  prisma.session.find_unique(where={"id": session_id})
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
     
@@ -72,7 +71,7 @@ async def complete_session(
         raise HTTPException(status_code=403, detail="Not authorized")
     
     try:
-        updated_session = await prisma.session.update(
+        await prisma.session.update(
             where={"id": session_id},
             data={
                 "status": "completed",
@@ -83,7 +82,7 @@ async def complete_session(
         
         # Update expert's rating if rating was provided
         if rating:
-            expert = await prisma.expert.find_unique(where={"id": session.expertId})
+            expert =  prisma.expert.find_unique(where={"id": session.expertId})
             total_ratings = await prisma.session.count(
                 where={
                     "expertId": session.expertId,
