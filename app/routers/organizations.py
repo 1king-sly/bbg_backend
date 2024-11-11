@@ -8,12 +8,12 @@ router = APIRouter()
 
 
 @router.post("/", response_model=Organization)
-async def create_organization(organization: OrganizationIn, current_user=Depends(get_current_user)):
+async def create_organization(organization: Organization, current_user=Depends(get_current_user)):
     if current_user.role != "ADMIN":
         raise HTTPException(status_code=403, detail="Not authorized")
 
     try:
-        hashed_password = get_password_hash(organization.password)
+        hashed_password = get_password_hash(str(organization.email))
 
         db_partner =  prisma.organization.create(
             data={

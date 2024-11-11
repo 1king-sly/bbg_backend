@@ -8,12 +8,12 @@ router = APIRouter()
 
 
 @router.post("/", response_model=Partner)
-async def create_partner(partner: PartnerIn, current_user=Depends(get_current_user)):
+async def create_partner(partner: Partner, current_user=Depends(get_current_user)):
     if current_user.role != "ADMIN":
         raise HTTPException(status_code=403, detail="Not authorized")
 
     try:
-        hashed_password = get_password_hash(partner.password)
+        hashed_password = get_password_hash(str(partner.email))
 
         db_partner =  prisma.partner.create(
             data={
