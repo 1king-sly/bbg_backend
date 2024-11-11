@@ -48,7 +48,7 @@ async def list_organizations():
         organization_dict['coursesCreated'] = len(organization.courses)
         organization_dict['eventsCreated'] = len(organization.events)
         organization_dict['sessionsHeld'] = len(organization.sessions)
-        organization_dict.append(organization_dict)
+        organization_list.append(organization_dict)
 
     return organization_list
 
