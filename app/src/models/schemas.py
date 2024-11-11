@@ -80,6 +80,9 @@ class Event(EventBase):
     id: int
     createdAt: datetime
     updatedAt: datetime
+    attendees:list
+    expert: Optional[list] = None
+
 
     class Config:
         from_attributes = True

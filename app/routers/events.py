@@ -45,6 +45,7 @@ async def list_events():
         "attendees": True
     })
 
+
     return events
 @router.get("/me", response_model=List[Event])
 async def list_events(current_user = Depends(get_current_user)):
@@ -76,6 +77,8 @@ async def list_events(current_user = Depends(get_current_user)):
 async def register_for_event(event_id: int, current_user = Depends(get_current_user)):
 
 
+
+
     event =  prisma.event.find_unique(where={"id": event_id})
     if not event:
         raise HTTPException(status_code=404, detail="Event not found")
@@ -93,7 +96,7 @@ async def register_for_event(event_id: int, current_user = Depends(get_current_u
     )
 
     if existing_registration:
-        raise HTTPException(status_code=400, detail="Already registered for this event")
+        raise HTTPException(status_code=402, detail="Already registered for this event")
 
     try:
          prisma.event.update(
