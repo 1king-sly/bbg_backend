@@ -34,8 +34,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     return encoded_jwt
 
 async def get_current_user(token: str = Depends(oauth2_scheme)):
-    print(token)
-    await prisma.connect()
+
 
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -50,7 +49,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     except :
         raise credentials_exception
         
-    user = await prisma.user.find_unique(where={"email": email})
+    user =  prisma.user.find_unique(where={"email": email})
     if user is None:
         raise credentials_exception
     return user
