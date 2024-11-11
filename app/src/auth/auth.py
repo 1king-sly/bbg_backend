@@ -35,7 +35,6 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
 
 async def get_current_user(token: str = Depends(oauth2_scheme)):
 
-
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -48,8 +47,21 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
             raise credentials_exception
     except :
         raise credentials_exception
-        
+
+        # Check each model to find a matching email
     user =  prisma.user.find_unique(where={"email": email})
-    if user is None:
+    partner =  prisma.partner.find_unique(where={"email": email})
+    organization =  prisma.organization.find_unique(where={"email": email})
+    expert =  prisma.expert.find_unique(where={"email": email})
+
+    # Return the first matching user, or raise an exception if none found
+    if user:
+        return user
+    elif partner:
+        return partner
+    elif organization:
+        return organization
+    elif expert:
+        return expert
+    else:
         raise credentials_exception
-    return user
