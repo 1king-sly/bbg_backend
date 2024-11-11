@@ -38,7 +38,7 @@ async def list_organizations():
         include={
             'courses': True,
             'events': True,
-            # 'sessions': True,
+            'sessions': True,
         }
     )
 
@@ -47,7 +47,7 @@ async def list_organizations():
         organization_dict = organization.dict()
         organization_dict['coursesCreated'] = len(organization.courses)
         organization_dict['eventsCreated'] = len(organization.events)
-        # organization_dict['sessionsHeld'] = len(organization.sessions)
+        organization_dict['sessionsHeld'] = len(organization.sessions)
         organization_dict.append(organization_dict)
 
     return organization_list

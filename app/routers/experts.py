@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from typing import List,Annotated
 from app.src.auth.auth import get_current_user,get_password_hash
-from app.src.models.schemas import ExpertCreate, Expert, ExpertUpdate,ExpertBase
+from app.src.models.schemas import ExpertCreate, Expert, ExpertUpdate, ExpertBase, ExpertOut
 from db import prisma
 
 router = APIRouter()
@@ -9,7 +9,7 @@ router = APIRouter()
 
 
 
-@router.post("/", response_model=ExpertBase)
+@router.post("/", response_model=ExpertOut)
 async def create_expert(expert: ExpertCreate, current_user = Depends(get_current_user)):
     if current_user.role != "ADMIN":
         raise HTTPException(status_code=403, detail="Not authorized")

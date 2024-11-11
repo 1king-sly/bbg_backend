@@ -56,6 +56,12 @@ class ExpertBase(BaseModel):
 class ExpertCreate(ExpertBase):
     password: str
 
+class ExpertOut(ExpertBase):
+    rating: float = 0.0
+    coursesCreated: int = 0
+    eventsCreated: int = 0
+    sessionsHeld: int = 0
+
 class Expert(ExpertBase):
     id:int
     rating: float = 0.0
@@ -187,10 +193,10 @@ class PartnerIn(Partner):
 
 
 class PartnerOut(Partner):
-    id:int
-    coursesCreated:int
-    sessionsHeld:int
-    eventsCreated:int
+    rating: float = 0.0
+    coursesCreated: int = 0
+    eventsCreated: int = 0
+    sessionsHeld: int = 0
 
 class Organization(BaseModel):
     name: str
@@ -205,10 +211,10 @@ class OrganizationIn(Organization):
 
 
 class OrganizationOut(Organization):
-    id: int
-    coursesCreated: int
-    sessionsHeld: int
-    eventsCreated: int
+    rating: float = 0.0
+    coursesCreated: int = 0
+    eventsCreated: int = 0
+    sessionsHeld: int = 0
 
 class ChatRequest(BaseModel):
     message:str

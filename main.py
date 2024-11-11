@@ -55,6 +55,6 @@ async def shutdown():
 
 @app.get("/")
 async def root():
-    return {"message": "Hello From  Baby Gal Backend Team"}
+    return {"message": "Hello From  Baby Gal Backend Team Engineer"}
 
 

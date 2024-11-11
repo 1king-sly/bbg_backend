@@ -53,35 +53,37 @@ model Expert {
 }
 
 model Partner {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   name        String
-  email       String   @unique
+  email       String    @unique
   phone       String
   description String?
   website     String?
-  role        Role     @default(PARTNER)
-  isVerified  Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  role        Role      @default(PARTNER)
+  isVerified  Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   password    String
-  courses     Course[] @relation("PartnerCourses")
-  events      Event[]  @relation("PartnerEvents")
+  courses     Course[]  @relation("PartnerCourses")
+  events      Event[]   @relation("PartnerEvents")
+  sessions    Session[] @relation("PartnerSessions")
 }
 
 model Organization {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   name        String
-  email       String   @unique
+  email       String    @unique
   phone       String
   description String?
   website     String?
-  role        Role     @default(ORGANIZATION)
-  isVerified  Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  role        Role      @default(ORGANIZATION)
+  isVerified  Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   password    String
-  courses     Course[] @relation("OrganizationCourses")
-  events      Event[]  @relation("OrganizationEvents")
+  courses     Course[]  @relation("OrganizationCourses")
+  events      Event[]   @relation("OrganizationEvents")
+  sessions    Session[] @relation("OrganizationSessions")
 }
 
 model Event {
@@ -167,20 +169,26 @@ model Certificate {
 }
 
 model Session {
-  id        Int       @id @default(autoincrement())
-  userId    Int
-  expertId  Int
-  startTime DateTime
-  endTime   DateTime?
-  status    String    @default("scheduled")
-  type      String
-  notes     String?
-  rating    Int?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  messages  Message[] @relation("SessionMessages")
-  expert    Expert    @relation("ExpertSessions", fields: [expertId], references: [id])
-  user      User      @relation("UserSessions", fields: [userId], references: [id])
+  id             Int       @id @default(autoincrement())
+  userId         Int
+  expertId       Int?
+  partnerId      Int?
+  organizationId Int?
+  startTime      DateTime
+  endTime        DateTime?
+  status         String    @default("scheduled")
+  type           String
+  notes          String?
+  rating         Int?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  messages       Message[] @relation("SessionMessages")
+  expert         Expert?   @relation("ExpertSessions", fields: [expertId], references: [id])
+  user           User      @relation("UserSessions", fields: [userId], references: [id])
+
+  Partner Partner? @relation("PartnerSessions", fields: [partnerId], references: [id])
+
+  Organization Organization? @relation("OrganizationSessions", fields: [organizationId], references: [id])
 }
 
 model Message {

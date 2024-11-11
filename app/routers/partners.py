@@ -7,7 +7,7 @@ from db import prisma
 router = APIRouter()
 
 
-@router.post("/", response_model=Partner)
+@router.post("/", response_model=PartnerOut)
 async def create_partner(partner: Partner, current_user=Depends(get_current_user)):
     if current_user.role != "ADMIN":
         raise HTTPException(status_code=403, detail="Not authorized")
@@ -38,7 +38,7 @@ async def list_partners():
         include={
             'courses': True,
             'events': True,
-            # 'sessions': True,
+            'sessions': True,
         }
     )
 
@@ -47,7 +47,7 @@ async def list_partners():
         partner_dict = partner.dict()
         partner_dict['coursesCreated'] = len(partner.courses)
         partner_dict['eventsCreated'] = len(partner.events)
-        # partner_dict['sessionsHeld'] = len(partner.sessions)
+        partner_dict['sessionsHeld'] = len(partner.sessions)
         partner_list.append(partner_dict)
 
     return partner_list
