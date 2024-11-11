@@ -72,9 +72,6 @@ class EventBase(BaseModel):
     date: datetime
     location: str
     maxAttendees: Optional[int] = None
-    expertId: Optional[int] = None
-    partnerId: Optional[int] = None
-    organizationId: Optional[int] = None
 
 class EventCreate(EventBase):
     pass

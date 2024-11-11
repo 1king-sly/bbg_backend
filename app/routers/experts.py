@@ -22,9 +22,10 @@ async def create_expert(expert: ExpertCreate, current_user = Depends(get_current
                 "email": str(expert.email),
                 'password': hashed_password,
                 "phone": expert.phone,
-                "description": expert.description,
-                "website": expert.website,
+                "bio": expert.bio,
+                # "website": expert.website,
                 "isVerified": expert.isVerified,
+                "fieldOfExpertise": expert.fieldOfExpertise,
 
             }
         )
@@ -34,6 +35,7 @@ async def create_expert(expert: ExpertCreate, current_user = Depends(get_current
 
 @router.get("/", response_model=List[Expert])
 async def list_experts():
+
     experts =  prisma.expert.find_many(
         include={
             'courses': True,
@@ -54,6 +56,7 @@ async def list_experts():
 
 @router.get("/{expert_id}", response_model=Expert)
 async def read_expert(expert_id: int):
+
     expert =  prisma.expert.find_unique(where={"id": expert_id})
     if not expert:
         raise HTTPException(status_code=404, detail="Expert not found")
@@ -65,6 +68,7 @@ async def update_expert(
     expert_update: ExpertBase,
     current_user = Depends(get_current_user)
 ):
+
     if current_user.role != "ADMIN":
         raise HTTPException(status_code=403, detail="Not authorized")
     
@@ -81,6 +85,7 @@ async def update_expert(
 
 @router.delete("/{expert_id}")
 async def delete_expert(expert_id: int, current_user=Depends(get_current_user)):
+
     if current_user.role != "ADMIN":
         raise HTTPException(status_code=403, detail="Not authorized")
 

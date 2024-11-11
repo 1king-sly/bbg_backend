@@ -41,6 +41,7 @@ model Expert {
   phone            String
   password         String
   fieldOfExpertise String
+  role             Role      @default(EXPERT)
   bio              String?
   rating           Float     @default(0)
   isVerified       Boolean   @default(false)
@@ -58,6 +59,7 @@ model Partner {
   phone       String
   description String?
   website     String?
+  role        Role     @default(PARTNER)
   isVerified  Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -73,6 +75,7 @@ model Organization {
   phone       String
   description String?
   website     String?
+  role        Role     @default(ORGANIZATION)
   isVerified  Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

@@ -13,7 +13,8 @@ router = APIRouter()
 
 @router.post("/token")
 async def login_for_access_token(form_data: UserLogin):
-    await prisma.connect()
+
+
     # Attempt to find the user in each of the models
     user =  prisma.user.find_unique(where={"email": form_data.email})
     partner =  prisma.partner.find_unique(where={"email": form_data.email})

@@ -3,24 +3,35 @@ from typing import List
 from app.src.auth.auth import get_current_user
 from app.src.models.schemas import EventCreate, Event, EventUpdate
 from db import prisma
+from datetime import datetime
 
 router = APIRouter()
 
 @router.post("/", response_model=Event)
 async def create_event(event: EventCreate, current_user = Depends(get_current_user)):
 
-
-    
     try:
 
-
-        if current_user.role not in ["ADMIN", "EXPERT"]:
+        if current_user.role not in ["ADMIN", "EXPERT", "PARTNER", "ORGANIZATION"]:
             raise HTTPException(status_code=403, detail="Not authorized")
 
+        event_data = event.model_dump()
 
-        db_event =  prisma.event.create(
-            data = event.model_dump()
-        )
+
+
+        if current_user.role == "EXPERT":
+            event_data["expertId"] = current_user.id
+        elif current_user.role == "PARTNER":
+            event_data["partnerId"] = current_user.id
+        elif current_user.role == "ORGANIZATION":
+            event_data["organizationId"] = current_user.id
+
+
+
+
+
+        db_event =  prisma.event.create(data=event_data)
+
         return db_event
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -41,18 +52,21 @@ async def list_events(current_user = Depends(get_current_user)):
     if not current_user:
         raise HTTPException(status_code=400, detail="User Does not exist")
 
-    if current_user.role not in ["ADMIN", "EXPERT"]:
+    if current_user.role not in ["ADMIN", "EXPERT", "PARTNER", "ORGANIZATION"]:
         raise HTTPException(status_code=403, detail="Not authorized")
 
     events =  prisma.event.find_many(
         where={
             'OR': [
                 {"expertId": current_user.id},
-                {"partnerId": current_user.id}
+                {"partnerId": current_user.id},
+                {"organizationId":current_user.id}
             ]
         },include={
         "expert": True,
-        "attendees": True
+        "attendees": True,
+        "partner": True,
+        "organization": True
     })
 
     return events
@@ -60,6 +74,7 @@ async def list_events(current_user = Depends(get_current_user)):
 
 @router.post("/{event_id}/register")
 async def register_for_event(event_id: int, current_user = Depends(get_current_user)):
+
 
     event =  prisma.event.find_unique(where={"id": event_id})
     if not event:
@@ -81,15 +96,14 @@ async def register_for_event(event_id: int, current_user = Depends(get_current_u
         raise HTTPException(status_code=400, detail="Already registered for this event")
 
     try:
-        await prisma.event.update(
+         prisma.event.update(
             where={"id": event_id},
             data={
                 "attendees": {
                     "connect": [{"id": current_user.id}]
                 }
-            }
-        )
-        return {"message": "Successfully registered for event"}
+            })
+         return {"message": "Successfully registered for event"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -109,7 +123,7 @@ async def update_event(
         raise HTTPException(status_code=403, detail="Not authorized")
 
     try:
-        updated_event = await prisma.event.update(
+        updated_event =  prisma.event.update(
             where={"id": event_id},
             data=event_update.model_dump(exclude_unset=True)
         )
