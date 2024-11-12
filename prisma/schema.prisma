@@ -13,6 +13,7 @@ model User {
   id              Int              @id @default(autoincrement())
   email           String           @unique
   name            String?
+  image           String?
   role            Role             @default(USER)
   phone           String?
   dateOfBirth     DateTime?
@@ -37,6 +38,7 @@ model User {
 model Expert {
   id               Int       @id @default(autoincrement())
   name             String
+  image            String?
   email            String    @unique
   phone            String
   password         String
@@ -55,6 +57,7 @@ model Expert {
 model Partner {
   id          Int       @id @default(autoincrement())
   name        String
+  image       String?
   email       String    @unique
   phone       String
   description String?
@@ -72,6 +75,7 @@ model Partner {
 model Organization {
   id          Int       @id @default(autoincrement())
   name        String
+  image       String?
   email       String    @unique
   phone       String
   description String?

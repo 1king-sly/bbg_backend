@@ -13,6 +13,7 @@ class Role(str, Enum):
 class UserBase(BaseModel):
     email: EmailStr
     name: str
+    image:Optional[str] = None
     phone: Optional[str] = None
     dateOfBirth: Optional[datetime] = None
     isPregnant: Optional[bool] = False
@@ -32,7 +33,7 @@ class UserCreate(UserBase):
 
 class User(UserBase):
     id: int
-    role: Role = Role.USER
+    role: str
     createdAt: datetime
     updatedAt: datetime
 
@@ -51,6 +52,8 @@ class ExpertBase(BaseModel):
     fieldOfExpertise: str
     bio: Optional[str] = None
     isVerified: bool = False
+    image: Optional[str] = None
+
 
 
 class ExpertCreate(ExpertBase):

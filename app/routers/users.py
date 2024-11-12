@@ -1,14 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException,FastAPI
 from app.src.auth.auth import get_current_user, get_password_hash
 from app.src.models.schemas import UserCreate, User, UserUpdate, UserIn
-from prisma import Prisma
+from db import prisma
 
 
 
 router = APIRouter()
 
 
-prisma = Prisma()
 
 # Event to connect to the database on startup
 
@@ -25,9 +24,8 @@ async def create_user(user: UserIn):
 
 
 
-        await prisma.connect()
 
-        db_user = await prisma.user.create(
+        db_user =  prisma.user.create(
             data={
                 "name": user.name,
                 "email": str(user.email),

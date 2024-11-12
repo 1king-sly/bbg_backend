@@ -62,6 +62,10 @@ async def read_expert(expert_id: int):
         raise HTTPException(status_code=404, detail="Expert not found")
     return expert
 
+@router.get("/profile/me", response_model=Expert)
+async def read_user_me(current_user: Expert = Depends(get_current_user)):
+    return current_user
+
 @router.put("/{expert_id}", response_model=Expert)
 async def update_expert(
     expert_id: int,

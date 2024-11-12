@@ -52,7 +52,9 @@ async def list_organizations():
 
     return organization_list
 
-
+@router.get("/profile/me", response_model=Organization)
+async def read_user_me(current_user: Organization = Depends(get_current_user)):
+    return current_user
 @router.get("/{organization_id}", response_model=Organization)
 async def read_partner(organization_id: int):
     organization =  prisma.organization.find_unique(where={"id": organization_id})
