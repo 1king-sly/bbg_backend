@@ -89,7 +89,7 @@ class Event(EventBase):
     id: int
     createdAt: datetime
     updatedAt: datetime
-    attendees:list
+    attendees:Optional[list] = []
     expert: Optional[list] = None
 
 
