@@ -27,7 +27,7 @@ async def login_for_access_token(form_data: UserLogin):
 
     if user and verify_password(form_data.password, user.password):
         account = user
-        role = "user"
+        role = user.role
     elif partner and verify_password(form_data.password, partner.password):
         account = partner
         role = "partner"

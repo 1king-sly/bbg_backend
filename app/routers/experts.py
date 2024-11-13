@@ -156,7 +156,6 @@ async def update_expert(
 
 @router.delete("/{expert_id}")
 async def delete_expert(expert_id: int, current_user=Depends(get_current_user)):
-    print(expert_id)
 
     if current_user.role != "ADMIN":
         raise HTTPException(status_code=403, detail="Not authorized")

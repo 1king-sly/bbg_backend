@@ -43,7 +43,11 @@ async def list_events():
     events =  prisma.event.find_many(include={
         "expert": True,
         "attendees": True
-    })
+    },
+        order={
+            "createdAt": "desc",
+        }
+    )
 
 
     return events
@@ -135,5 +139,15 @@ async def update_event(
             data=event_update.model_dump(exclude_unset=True)
         )
         return updated_event
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+@router.delete("/{event_id}")
+async def delete_expert(event_id: int, current_user=Depends(get_current_user)):
+    if current_user.role not in ["ADMIN","EXPERT","PARTNER","ORGANIZATION"]:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    try:
+        deleted_event =  prisma.event.delete(where={"id": event_id})
+        return deleted_event
+
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
