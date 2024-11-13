@@ -68,7 +68,11 @@ async def list_events(current_user = Depends(get_current_user)):
         "attendees": True,
         "partner": True,
         "organization": True
-    })
+    },
+        order={
+            "createdAt":"desc",
+        }
+    )
 
     return events
 

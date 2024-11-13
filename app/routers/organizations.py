@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException
 from typing import List, Annotated
@@ -59,7 +59,7 @@ async def list_organizations():
 async def read_user_me(current_user: Organization = Depends(get_current_user)):
     return current_user
 
-def get_month_key(date: datetime.datetime) -> str:
+def get_month_key(date: datetime) -> str:
         return f"{date.year}-{date.month:02d}"
 @router.get("/me/stats", response_model=dict)
 async def read_user_me_stats(current_user: Organization = Depends(get_current_user)):
