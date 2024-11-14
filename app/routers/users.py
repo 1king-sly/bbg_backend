@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException,FastAPI
 from app.src.auth.auth import get_current_user, get_password_hash
-from app.src.models.schemas import UserCreate, User, UserUpdate, UserIn
+from app.src.models.schemas import UserCreate, User, UserUpdate, UserIn,UserOut
 from db import prisma
 
 
@@ -39,18 +39,17 @@ async def create_user(user: UserIn):
         print(str(e))
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.get("/me", response_model=User)
-async def read_user_me(current_user: User = Depends(get_current_user)):
+@router.get("/me", response_model=UserOut)
+async def read_user_me(current_user: UserOut = Depends(get_current_user)):
     return current_user
 
-@router.put("/me", response_model=User)
-async def update_user_me(user_update: User, current_user: User = Depends(get_current_user)):
-    print(user_update.model_dump(exclude_unset=True))
+@router.put("/me", response_model=UserOut)
+async def update_user_me(user_update: UserOut, current_user: UserOut = Depends(get_current_user)):
     if not current_user:
         raise HTTPException(status_code=403, detail="User Not Found")
 
     try:
-        updated_user = await prisma.user.update(
+        updated_user =  prisma.user.update(
             where={"id": current_user.id},
             data=user_update.model_dump(exclude_unset=True)
         )
