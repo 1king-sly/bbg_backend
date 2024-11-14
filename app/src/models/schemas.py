@@ -13,11 +13,13 @@ class Role(str, Enum):
 class UserBase(BaseModel):
     email: EmailStr
     name: str
+    cycleDays:int
     image:Optional[str] = None
     phone: Optional[str] = None
     dateOfBirth: Optional[datetime] = None
-    isPregnant: Optional[bool] = False
     pregnancyDate: Optional[datetime] = None
+    isPregnant: Optional[bool] = False
+    isMenstruating: Optional[bool] = False
     hasChild: Optional[bool] = False
     childBirthDate: Optional[datetime] = None
     childGender: Optional[str] = None

@@ -22,6 +22,8 @@ model User {
   hasChild        Boolean          @default(false)
   childBirthDate  DateTime?
   childGender     String?
+  isMenstruating  Boolean          @default(false)
+  cycleDays       Int              @default(28)
   lastPeriodDate  DateTime?
   periodEndDate   DateTime?
   createdAt       DateTime         @default(now())

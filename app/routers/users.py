@@ -44,7 +44,11 @@ async def read_user_me(current_user: User = Depends(get_current_user)):
     return current_user
 
 @router.put("/me", response_model=User)
-async def update_user_me(user_update: UserUpdate, current_user: User = Depends(get_current_user)):
+async def update_user_me(user_update: User, current_user: User = Depends(get_current_user)):
+    print(user_update.model_dump(exclude_unset=True))
+    if not current_user:
+        raise HTTPException(status_code=403, detail="User Not Found")
+
     try:
         updated_user = await prisma.user.update(
             where={"id": current_user.id},
@@ -63,6 +67,5 @@ async def read_user(user_id: int, current_user: User = Depends(get_current_user)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
-
 
 
