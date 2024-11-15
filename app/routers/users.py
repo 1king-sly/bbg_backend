@@ -11,7 +11,7 @@ router = APIRouter()
 
 
 
-@router.get("/", response_model=List[UserOut])
+@router.get("/", response_model=List[User])
 async def list_users():
     try:
         db_users =  prisma.user.find_many(
