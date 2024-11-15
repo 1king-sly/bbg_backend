@@ -1,6 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException,FastAPI
+from typing import List
+
+from fastapi import APIRouter, Depends, HTTPException
 from app.src.auth.auth import get_current_user, get_password_hash
-from app.src.models.schemas import UserCreate, User, UserUpdate, UserIn,UserOut
+from app.src.models.schemas import  User,  UserIn,UserOut
 from db import prisma
 
 
@@ -9,21 +11,28 @@ router = APIRouter()
 
 
 
-# Event to connect to the database on startup
+@router.get("/", response_model=List[UserOut])
+async def list_users():
+    try:
+        db_users =  prisma.user.findMany(
+            where={
+                "role":"USER"
+            },
+            order={
+                "createdAt":"desc"
+            }
 
+        )
+
+        return db_users
+    except Exception as e:
+        print(str(e))
+        raise HTTPException(status_code=400, detail=str(e))
 
 @router.post("/", response_model=User)
 async def create_user(user: UserIn):
     try:
-        # Hash the password before adding it to the user data
         hashed_password = get_password_hash(user.password)
-
-        # Use model_dump to get data excluding password
-
-
-
-
-
 
         db_user =  prisma.user.create(
             data={
