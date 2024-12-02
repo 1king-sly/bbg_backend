@@ -45,7 +45,30 @@ async def list_events():
         "attendees": True
     },
         order={
-            "createdAt": "desc",
+            "date": "desc",
+        }
+    )
+
+
+    return events
+
+@router.get("/upcoming", response_model=List[Event])
+async def list_upcoming_events():
+    current_datetime = datetime.utcnow()
+
+
+    events =  prisma.event.find_many(
+        where={
+            "date": {
+                "gte": current_datetime
+            }
+        },
+        include={
+        "expert": True,
+        "attendees": True
+    },
+        order={
+            "date": "asc",
         }
     )
 

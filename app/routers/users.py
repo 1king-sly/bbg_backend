@@ -57,6 +57,9 @@ async def update_user_me(user_update: UserOut, current_user: UserOut = Depends(g
     if not current_user:
         raise HTTPException(status_code=403, detail="User Not Found")
 
+
+
+
     try:
         updated_user =  prisma.user.update(
             where={"id": current_user.id},
