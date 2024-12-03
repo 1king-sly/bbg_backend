@@ -35,6 +35,9 @@ model User {
   messages        Message[]        @relation("UserMessages")
   sessions        Session[]        @relation("UserSessions")
   events          Event[]          @relation("Attendees")
+
+  QuizAttempt    QuizAttempt[]
+  ModuleProgress ModuleProgress[]
 }
 
 model Expert {
@@ -111,7 +114,7 @@ model Event {
 }
 
 model Course {
-  id             Int           @id @default(autoincrement())
+  id             String        @id @default(cuid())
   title          String
   description    String
   category       String
@@ -128,22 +131,72 @@ model Course {
 }
 
 model Module {
-  id        Int        @id @default(autoincrement())
-  title     String
-  content   String
-  videoUrl  String?
-  order     Int
-  courseId  Int
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  course    Course     @relation(fields: [courseId], references: [id])
-  progress  Progress[]
+  id             String           @id @default(cuid())
+  title          String
+  content        String
+  videoUrl       String?
+  order          Int
+  courseId       String
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  course         Course           @relation(fields: [courseId], references: [id])
+  progress       Progress[]
+  Quiz           Quiz?
+  ModuleProgress ModuleProgress[]
+}
+
+model Quiz {
+  id        Int           @id @default(autoincrement())
+  moduleId  String        @unique
+  module    Module        @relation(fields: [moduleId], references: [id])
+  questions Question[]
+  attempts  QuizAttempt[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+model Question {
+  id            Int           @id @default(autoincrement())
+  quizId        Int
+  quiz          Quiz          @relation(fields: [quizId], references: [id])
+  content       String
+  options       String[]
+  correctAnswer Int
+  attempts      QuizAttempt[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model QuizAttempt {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  user       User     @relation(fields: [userId], references: [id])
+  quizId     Int
+  quiz       Quiz     @relation(fields: [quizId], references: [id])
+  questionId Int
+  question   Question @relation(fields: [questionId], references: [id])
+  answer     Int
+  isCorrect  Boolean
+  createdAt  DateTime @default(now())
+}
+
+model ModuleProgress {
+  id           Int       @id @default(autoincrement())
+  userId       Int
+  moduleId     String
+  isCompleted  Boolean   @default(false)
+  isLocked     Boolean   @default(true)
+  lastAccessed DateTime?
+  user         User      @relation(fields: [userId], references: [id])
+  module       Module    @relation(fields: [moduleId], references: [id])
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 }
 
 model Enrollment {
   id          Int          @id @default(autoincrement())
   userId      Int
-  courseId    Int
+  courseId    String
   status      String       @default("in_progress")
   progress    Int          @default(0)
   completedAt DateTime?
@@ -157,7 +210,7 @@ model Enrollment {
 model Progress {
   id        Int      @id @default(autoincrement())
   userId    Int
-  moduleId  Int
+  moduleId  String
   completed Boolean  @default(false)
   score     Int?
   createdAt DateTime @default(now())
@@ -166,7 +219,7 @@ model Progress {
 }
 
 model Certificate {
-  id           Int        @id @default(autoincrement())
+  id           String     @id @default(cuid())
   userId       Int
   enrollmentId Int        @unique
   issueDate    DateTime   @default(now())

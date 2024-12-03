@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from datetime import datetime
 from typing import Optional, List
 from enum import Enum
@@ -102,24 +102,6 @@ class Event(EventBase):
     class Config:
         from_attributes = True
 
-class CourseBase(BaseModel):
-    title: str
-    description: str
-    category: str
-    expertId: Optional[int] = None
-    partnerId: Optional[int] = None
-    organizationId: Optional[int] = None
-
-class CourseCreate(CourseBase):
-    pass
-
-class Course(CourseBase):
-    id: int
-    createdAt: datetime
-    updatedAt: datetime
-
-    class Config:
-        from_attributes = True
 
 class EnrollmentBase(BaseModel):
     userId: int
@@ -177,8 +159,7 @@ class EventUpdate(Event):
     pass
 
 
-class CourseUpdate(Course):
-    pass
+
 
 
 class ExpertUpdate(Expert):
@@ -227,5 +208,139 @@ class OrganizationOut(Organization):
 
 class ChatRequest(BaseModel):
     message:str
+
+class QuestionBase(BaseModel):
+    question: str
+    options: List[str]
+    correct_answer: int = Field(ge=0)
+
+class QuestionCreate(QuestionBase):
+    pass
+
+class QuestionResponse(QuestionBase):
+    id: int
+    quiz_id: int
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class QuizBase(BaseModel):
+    questions: List[QuestionCreate]
+
+class QuizCreate(QuizBase):
+    pass
+
+class QuizResponse(QuizBase):
+    id: int
+    module_id: int
+    questions: List[QuestionResponse]
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class QuizAttemptRequest(BaseModel):
+    user_id: int
+    answers: List[int]
+
+class QuizAttemptResponse(BaseModel):
+    id: int
+    user_id: int
+    quiz_id: int
+    question_id: int
+    answer: int
+    is_correct: bool
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class QuizSubmissionResponse(BaseModel):
+    score: float
+    attempts: List[QuizAttemptResponse]
+
+
+
+class ModuleBase(BaseModel):
+    title: str
+    content: str
+    video_url: Optional[str] = None
+    order: int
+
+class ModuleCreate(ModuleBase):
+    quiz: Optional[QuizCreate] = None
+
+class ModuleResponse(ModuleBase):
+    id: str
+    course_id: str
+    quiz: Optional[QuizResponse] = None
+    is_completed: bool = False
+    is_locked: bool = True
+    last_accessed: Optional[datetime] = None
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class CourseBase(BaseModel):
+    title: str
+    description: str
+    category: str
+    max_enrollments: int = Field(default=100, ge=1)
+
+class CourseCreate(CourseBase):
+    modules: List[ModuleCreate]
+
+class CourseResponse(CourseBase):
+    id: str
+    expertId: Optional[int] | None = None
+    partnerId: Optional[int] | None = None
+    organizationId:Optional[int] | None = None
+    modules: List[ModuleResponse]
+    enrollments: Optional[list] | None = None
+    modules:Optional[list] | None = None
+    createdAt: datetime
+    updatedAt: datetime
+
+    class Config:
+        from_attributes = True
+
+class CourseEnrollmentRequest(BaseModel):
+    user_id: int
+    course_id: int
+
+class CourseEnrollmentResponse(BaseModel):
+    id: int
+    user_id: int
+    course_id: int
+    status: str
+    progress: int
+    completed_at: Optional[datetime]
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class ModuleProgressUpdate(BaseModel):
+    user_id: int
+    is_completed: bool
+
+class ModuleProgressResponse(BaseModel):
+    id: int
+    user_id: int
+    module_id: int
+    is_completed: bool
+    is_locked: bool
+    last_accessed: Optional[datetime]
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
 
 

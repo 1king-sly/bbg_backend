@@ -1,32 +1,68 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
 from app.src.auth.auth import get_current_user
-from app.src.models.schemas import CourseCreate, Course, CourseUpdate
+from app.src.models.schemas import CourseCreate, CourseResponse
 from db import prisma
 
 router = APIRouter()
 
-@router.post("/", response_model=Course)
+@router.post("/", response_model=CourseResponse)
 async def create_course(course: CourseCreate, current_user = Depends(get_current_user)):
     if current_user.role not in ["ADMIN", "EXPERT"]:
         raise HTTPException(status_code=403, detail="Not authorized")
-    
+
     try:
-        db_course =  prisma.course.create(
-            data = course.model_dump()
+
+
+        course =  prisma.course.create(
+            data = {
+                "expertId": current_user.id if current_user.role == "EXPERT" else None,
+                "partnerId": current_user.id if current_user.role == "PARTNER" else None,
+                "organizationId": current_user.id if current_user.role == "ORGANIZATION" else None,
+                'title': course.title,
+                'description': course.description,
+                "category": course.category,
+                "modules": {
+                "create": [
+                    {
+                        "title": module.title,
+                        "content": module.content,
+                        "videoUrl": module.video_url,
+                        "order": module.order,
+                        "Quiz": {
+                            "create": {
+                                "questions": {
+                                    "create": [
+                                        {
+                                            "content": question.question,
+                                            "options": question.options,
+                                            "correctAnswer": question.correct_answer,
+                                        }
+                                        for question in module.quiz.questions
+                                    ]
+                                }
+                            }
+                        } if module.quiz else {},
+                    }
+                    for module in course.modules
+                ]
+            },
+            },
+            include={"modules": {"include": {"Quiz": True}}},
+
         )
-        return db_course
+        return course
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.get("/", response_model=List[Course])
+@router.get("/", response_model=List[CourseResponse])
 async def list_courses():
     return  prisma.course.find_many(include={
         "expert": True,
         "modules": True
     })
 
-@router.get("/{course_id}", response_model=Course)
+@router.get("/{course_id}", response_model=CourseResponse)
 async def read_course(course_id: int):
     course =  prisma.course.find_unique(
         where={"id": course_id},
@@ -39,10 +75,10 @@ async def read_course(course_id: int):
         raise HTTPException(status_code=404, detail="Course not found")
     return course
 
-@router.put("/{course_id}", response_model=Course)
+@router.put("/{course_id}", response_model=CourseResponse)
 async def update_course(
     course_id: int,
-    course_update: CourseUpdate,
+    course_update: CourseCreate,
     current_user = Depends(get_current_user)
 ):
     course =  prisma.course.find_unique(where={"id": course_id})
