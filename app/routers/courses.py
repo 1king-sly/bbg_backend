@@ -8,7 +8,7 @@ router = APIRouter()
 
 @router.post("/", response_model=CourseResponse)
 async def create_course(course: CourseCreate, current_user = Depends(get_current_user)):
-    if current_user.role not in ["ADMIN", "EXPERT"]:
+    if current_user.role not in ["ADMIN", "EXPERT","PARTNER","ORGANIZATION"]:
         raise HTTPException(status_code=403, detail="Not authorized")
 
     try:
@@ -27,7 +27,7 @@ async def create_course(course: CourseCreate, current_user = Depends(get_current
                     {
                         "title": module.title,
                         "content": module.content,
-                        "videoUrl": module.video_url,
+                        "videoUrl": module.videoUrl,
                         "order": module.order,
                         "Quiz": {
                             "create": {
@@ -36,9 +36,9 @@ async def create_course(course: CourseCreate, current_user = Depends(get_current
                                         {
                                             "content": question.question,
                                             "options": question.options,
-                                            "correctAnswer": question.correct_answer,
+                                            "correctAnswer": question.correctAnswer,
                                         }
-                                        for question in module.quiz.questions
+                                        for question in module.Quiz.questions
                                     ]
                                 }
                             }
@@ -59,9 +59,48 @@ async def create_course(course: CourseCreate, current_user = Depends(get_current
 async def list_courses():
     return  prisma.course.find_many(include={
         "expert": True,
-        "modules": True
+        "modules": {
+                "include": {
+                    "Quiz": {
+                        "include": {
+                            "questions": True
+                        }
+                    }
+                }
+            },
+        "enrollments":True,
     })
 
+
+@router.get("/created", response_model=List[CourseResponse])
+async def list_courses_created_by_me(current_user = Depends(get_current_user)):
+
+    if not current_user:
+        raise HTTPException(status_code=404, detail="User does not exist")
+
+
+    if current_user.role not in ["ADMIN", "EXPERT","ORGANIZATION","PARTNER"]:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    return  prisma.course.find_many(
+        where={
+            "expertId": current_user.id if current_user.role == "EXPERT" else None,
+            "partnerId": current_user.id if current_user.role == "PARTNER" else None,
+            "organizationId": current_user.id if current_user.role == "ORGANIZATION" else None,
+        },
+        include={
+        "expert": True,
+        "modules": {
+                "include": {
+                    "Quiz": {
+                        "include": {
+                            "questions": True
+                        }
+                    }
+                }
+            },
+        "enrollments":True,
+    })
 @router.get("/{course_id}", response_model=CourseResponse)
 async def read_course(course_id: int):
     course =  prisma.course.find_unique(

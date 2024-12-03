@@ -212,7 +212,7 @@ class ChatRequest(BaseModel):
 class QuestionBase(BaseModel):
     question: str
     options: List[str]
-    correct_answer: int = Field(ge=0)
+    correctAnswer: int = Field(ge=0)
 
 class QuestionCreate(QuestionBase):
     pass
@@ -267,11 +267,11 @@ class QuizSubmissionResponse(BaseModel):
 class ModuleBase(BaseModel):
     title: str
     content: str
-    video_url: Optional[str] = None
+    videoUrl: Optional[str] = None
     order: int
 
 class ModuleCreate(ModuleBase):
-    quiz: Optional[QuizCreate] = None
+    Quiz: Optional[QuizCreate] = None
 
 class ModuleResponse(ModuleBase):
     id: str
@@ -300,7 +300,6 @@ class CourseResponse(CourseBase):
     expertId: Optional[int] | None = None
     partnerId: Optional[int] | None = None
     organizationId:Optional[int] | None = None
-    modules: List[ModuleResponse]
     enrollments: Optional[list] | None = None
     modules:Optional[list] | None = None
     createdAt: datetime

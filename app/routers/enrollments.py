@@ -9,6 +9,20 @@ router = APIRouter()
 @router.post("/courses/{course_id}", response_model=Enrollment)
 async def enroll_in_course(course_id: int, current_user = Depends(get_current_user)):
     try:
+        existing_enrollment = prisma.courses.find_first(
+            where={
+                "id": course_id,
+                "enrollments": {
+                    "some": {
+                        "id": current_user.id
+                    }
+                }
+            }
+        )
+
+        if existing_enrollment:
+            raise HTTPException(status_code=402, detail="Already registered for this event")
+
         enrollment =  prisma.enrollment.create(
             data={
                 "userId": current_user.id,
