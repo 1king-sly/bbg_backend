@@ -7,16 +7,11 @@ from db import prisma
 router = APIRouter()
 
 @router.post("/courses/{course_id}", response_model=Enrollment)
-async def enroll_in_course(course_id: int, current_user = Depends(get_current_user)):
+async def enroll_in_course(course_id: str, current_user = Depends(get_current_user)):
     try:
-        existing_enrollment = prisma.courses.find_first(
+        existing_enrollment = prisma.enrollment.find_first(
             where={
-                "id": course_id,
-                "enrollments": {
-                    "some": {
-                        "id": current_user.id
-                    }
-                }
+                "userId": current_user.id,
             }
         )
 

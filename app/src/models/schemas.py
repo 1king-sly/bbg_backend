@@ -105,7 +105,7 @@ class Event(EventBase):
 
 class EnrollmentBase(BaseModel):
     userId: int
-    courseId: int
+    courseId: str
     status: str = "in_progress"
     progress: int = 0
 
