@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
 from app.src.auth.auth import get_current_user
-from app.src.models.schemas import CourseCreate, CourseResponse
+from app.src.models.schemas import CourseCreate, CourseResponse, ModuleResponse
 from db import prisma
 
 router = APIRouter()
@@ -160,7 +160,7 @@ async def read_course(course_id: str):
     return course
 
 
-@router.get("/{module_id}", response_model=CourseResponse)
+@router.get("/modules/{module_id}", response_model=ModuleResponse)
 async def read_course_single_module(module_id: str):
     module =  prisma.module.find_unique(
         where={"id": module_id},
@@ -169,12 +169,11 @@ async def read_course_single_module(module_id: str):
                 "include": {
                     "questions": True
                 }
-            },
-            "ModuleProgress": True,
+            }
         }
     )
     if not module:
-        raise HTTPException(status_code=404, detail="Course not found")
+        raise HTTPException(status_code=404, detail="Module not found")
     return module
 
 @router.put("/{course_id}", response_model=CourseResponse)

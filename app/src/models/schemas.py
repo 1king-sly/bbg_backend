@@ -118,9 +118,6 @@ class Enrollment(EnrollmentBase):
     createdAt: datetime
     updatedAt: datetime
     course: Optional[list] | None = None
-    # expert: Optional[list] | None = None
-    # organization: Optional[list] | None = None
-    # partner: Optional[list] | None = None
 
 
     class Config:
@@ -215,7 +212,7 @@ class ChatRequest(BaseModel):
     message:str
 
 class QuestionBase(BaseModel):
-    question: str
+    content: str
     options: List[str]
     correctAnswer: int = Field(ge=0)
 
@@ -224,9 +221,8 @@ class QuestionCreate(QuestionBase):
 
 class QuestionResponse(QuestionBase):
     id: int
-    quiz_id: int
-    created_at: datetime
-    updated_at: datetime
+    quizId: int
+
 
     class Config:
         from_attributes = True
@@ -239,10 +235,9 @@ class QuizCreate(QuizBase):
 
 class QuizResponse(QuizBase):
     id: int
-    module_id: int
+    moduleId: str
     questions: List[QuestionResponse]
-    created_at: datetime
-    updated_at: datetime
+
 
     class Config:
         from_attributes = True
@@ -280,13 +275,10 @@ class ModuleCreate(ModuleBase):
 
 class ModuleResponse(ModuleBase):
     id: str
-    course_id: str
-    quiz: Optional[QuizResponse] = None
-    is_completed: bool = False
-    is_locked: bool = True
-    last_accessed: Optional[datetime] = None
-    created_at: datetime
-    updated_at: datetime
+    courseId: str
+    Quiz: Optional[QuizResponse] = None
+    createdAt: datetime
+    updatedAt: datetime
 
     class Config:
         from_attributes = True
@@ -346,5 +338,6 @@ class ModuleProgressResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
 
 

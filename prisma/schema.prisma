@@ -1,7 +1,7 @@
 generator client {
   provider             = "prisma-client-py"
+  recursive_type_depth = "5"
   interface            = "sync"
-  recursive_type_depth = 5
 }
 
 datasource db {
@@ -13,7 +13,6 @@ model User {
   id              Int              @id @default(autoincrement())
   email           String           @unique
   name            String?
-  image           String?
   role            Role             @default(USER)
   phone           String?
   dateOfBirth     DateTime?
@@ -22,38 +21,38 @@ model User {
   hasChild        Boolean          @default(false)
   childBirthDate  DateTime?
   childGender     String?
-  isMenstruating  Boolean          @default(false)
-  cycleDays       Int              @default(28)
   lastPeriodDate  DateTime?
   periodEndDate   DateTime?
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
   password        String
+  image           String?
+  cycleDays       Int              @default(28)
+  isMenstruating  Boolean          @default(false)
   certificates    Certificate[]
   enrollments     Enrollment[]
   menstrualCycles MenstrualCycle[]
   messages        Message[]        @relation("UserMessages")
+  ModuleProgress  ModuleProgress[]
+  QuizAttempt     QuizAttempt[]
   sessions        Session[]        @relation("UserSessions")
   events          Event[]          @relation("Attendees")
-
-  QuizAttempt    QuizAttempt[]
-  ModuleProgress ModuleProgress[]
 }
 
 model Expert {
   id               Int       @id @default(autoincrement())
   name             String
-  image            String?
   email            String    @unique
   phone            String
   password         String
   fieldOfExpertise String
-  role             Role      @default(EXPERT)
   bio              String?
   rating           Float     @default(0)
   isVerified       Boolean   @default(false)
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
+  role             Role      @default(EXPERT)
+  image            String?
   courses          Course[]
   events           Event[]   @relation("ExpertEvents")
   sessions         Session[] @relation("ExpertSessions")
@@ -62,16 +61,16 @@ model Expert {
 model Partner {
   id          Int       @id @default(autoincrement())
   name        String
-  image       String?
   email       String    @unique
   phone       String
   description String?
   website     String?
-  role        Role      @default(PARTNER)
   isVerified  Boolean   @default(false)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   password    String
+  role        Role      @default(PARTNER)
+  image       String?
   courses     Course[]  @relation("PartnerCourses")
   events      Event[]   @relation("PartnerEvents")
   sessions    Session[] @relation("PartnerSessions")
@@ -80,16 +79,16 @@ model Partner {
 model Organization {
   id          Int       @id @default(autoincrement())
   name        String
-  image       String?
   email       String    @unique
   phone       String
   description String?
   website     String?
-  role        Role      @default(ORGANIZATION)
   isVerified  Boolean   @default(false)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   password    String
+  role        Role      @default(ORGANIZATION)
+  image       String?
   courses     Course[]  @relation("OrganizationCourses")
   events      Event[]   @relation("OrganizationEvents")
   sessions    Session[] @relation("OrganizationSessions")
@@ -140,44 +139,44 @@ model Module {
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
   course         Course           @relation(fields: [courseId], references: [id])
+  ModuleProgress ModuleProgress[]
   progress       Progress[]
   Quiz           Quiz?
-  ModuleProgress ModuleProgress[]
 }
 
 model Quiz {
   id        Int           @id @default(autoincrement())
   moduleId  String        @unique
-  module    Module        @relation(fields: [moduleId], references: [id])
-  questions Question[]
-  attempts  QuizAttempt[]
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
+  questions Question[]
+  module    Module        @relation(fields: [moduleId], references: [id])
+  attempts  QuizAttempt[]
 }
 
 model Question {
   id            Int           @id @default(autoincrement())
   quizId        Int
-  quiz          Quiz          @relation(fields: [quizId], references: [id])
   content       String
   options       String[]
   correctAnswer Int
-  attempts      QuizAttempt[]
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
+  quiz          Quiz          @relation(fields: [quizId], references: [id])
+  attempts      QuizAttempt[]
 }
 
 model QuizAttempt {
   id         Int      @id @default(autoincrement())
   userId     Int
-  user       User     @relation(fields: [userId], references: [id])
   quizId     Int
-  quiz       Quiz     @relation(fields: [quizId], references: [id])
   questionId Int
-  question   Question @relation(fields: [questionId], references: [id])
   answer     Int
   isCorrect  Boolean
   createdAt  DateTime @default(now())
+  question   Question @relation(fields: [questionId], references: [id])
+  quiz       Quiz     @relation(fields: [quizId], references: [id])
+  user       User     @relation(fields: [userId], references: [id])
 }
 
 model ModuleProgress {
@@ -187,10 +186,10 @@ model ModuleProgress {
   isCompleted  Boolean   @default(false)
   isLocked     Boolean   @default(true)
   lastAccessed DateTime?
-  user         User      @relation(fields: [userId], references: [id])
-  module       Module    @relation(fields: [moduleId], references: [id])
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
+  module       Module    @relation(fields: [moduleId], references: [id])
+  user         User      @relation(fields: [userId], references: [id])
 }
 
 model Enrollment {
@@ -228,26 +227,24 @@ model Certificate {
 }
 
 model Session {
-  id             Int       @id @default(autoincrement())
+  id             Int           @id @default(autoincrement())
   userId         Int
   expertId       Int?
-  partnerId      Int?
-  organizationId Int?
   startTime      DateTime
   endTime        DateTime?
-  status         String    @default("scheduled")
+  status         String        @default("scheduled")
   type           String
   notes          String?
   rating         Int?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  messages       Message[] @relation("SessionMessages")
-  expert         Expert?   @relation("ExpertSessions", fields: [expertId], references: [id])
-  user           User      @relation("UserSessions", fields: [userId], references: [id])
-
-  Partner Partner? @relation("PartnerSessions", fields: [partnerId], references: [id])
-
-  Organization Organization? @relation("OrganizationSessions", fields: [organizationId], references: [id])
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  organizationId Int?
+  partnerId      Int?
+  messages       Message[]     @relation("SessionMessages")
+  expert         Expert?       @relation("ExpertSessions", fields: [expertId], references: [id])
+  Organization   Organization? @relation("OrganizationSessions", fields: [organizationId], references: [id])
+  Partner        Partner?      @relation("PartnerSessions", fields: [partnerId], references: [id])
+  user           User          @relation("UserSessions", fields: [userId], references: [id])
 }
 
 model Message {
