@@ -35,8 +35,10 @@ async def list_my_enrollments(current_user = Depends(get_current_user)):
         where={"userId": current_user.id},
         include={
             "course": True,
-            "progress": True
-        }
+
+            }
+
+
     )
 
 @router.post("/progress", response_model=Progress)

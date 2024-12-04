@@ -117,6 +117,11 @@ class Enrollment(EnrollmentBase):
     completedAt: Optional[datetime] = None
     createdAt: datetime
     updatedAt: datetime
+    course: Optional[list] | None = None
+    # expert: Optional[list] | None = None
+    # organization: Optional[list] | None = None
+    # partner: Optional[list] | None = None
+
 
     class Config:
         from_attributes = True

@@ -101,18 +101,81 @@ async def list_courses_created_by_me(current_user = Depends(get_current_user)):
             },
         "enrollments":True,
     })
+
+
+@router.get("/my-courses", response_model=List[CourseResponse])
+async def list_courses_enrolled_by_me(current_user = Depends(get_current_user)):
+
+    if not current_user:
+        raise HTTPException(status_code=404, detail="User does not exist")
+
+
+
+
+    return  prisma.course.find_many(
+        where={
+           "enrollments":{
+               "some":{
+                   "userId": current_user.id
+
+               }
+           }
+        },
+        include={
+        "expert": True,
+        "organization":True,
+        "partner":True,
+        "modules": {
+                "include": {
+                    "Quiz": {
+                        "include": {
+                            "questions": True
+                        }
+                    }
+                }
+            },
+        "enrollments":True,
+    })
 @router.get("/{course_id}", response_model=CourseResponse)
-async def read_course(course_id: int):
+async def read_course(course_id: str):
     course =  prisma.course.find_unique(
         where={"id": course_id},
         include={
             "expert": True,
-            "modules": True
+            "modules": {
+                "include": {
+                    "Quiz": {
+                        "include": {
+                            "questions": True
+                        }
+                    },
+                    "ModuleProgress":True,
+                    "progress":True,
+                }
+            },
         }
     )
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
     return course
+
+
+@router.get("/{module_id}", response_model=CourseResponse)
+async def read_course_single_module(module_id: str):
+    module =  prisma.module.find_unique(
+        where={"id": module_id},
+        include={
+            "Quiz": {
+                "include": {
+                    "questions": True
+                }
+            },
+            "ModuleProgress": True,
+        }
+    )
+    if not module:
+        raise HTTPException(status_code=404, detail="Course not found")
+    return module
 
 @router.put("/{course_id}", response_model=CourseResponse)
 async def update_course(
