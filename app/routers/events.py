@@ -75,7 +75,7 @@ async def list_upcoming_events():
 
     return events
 @router.get("/me", response_model=List[Event])
-async def list_events(current_user = Depends(get_current_user)):
+async def list_events_created_by_me(current_user = Depends(get_current_user)):
 
     if not current_user:
         raise HTTPException(status_code=400, detail="User Does not exist")
@@ -174,3 +174,35 @@ async def delete_expert(event_id: int, current_user=Depends(get_current_user)):
 
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.get("/enrolled/me", response_model=List[Event])
+async def list_events_enrolled_to_by_me(current_user = Depends(get_current_user)):
+
+    if not current_user:
+        raise HTTPException(status_code=400, detail="User Does not exist")
+
+    try:
+
+
+        events =  prisma.event.find_many(
+            where={
+               "attendees":{
+                   "some":{
+                       "id":current_user.id
+                   }
+               }
+            },include={
+            "expert": True,
+            "attendees": True,
+            "partner": True,
+            "organization": True
+        },
+            order={
+                "createdAt":"desc",
+            }
+        )
+
+        return events
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

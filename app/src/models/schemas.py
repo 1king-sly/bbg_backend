@@ -91,12 +91,18 @@ class EventBase(BaseModel):
 class EventCreate(EventBase):
     pass
 
+class EventCreators(BaseModel):
+    name:str
+
+
 class Event(EventBase):
     id: int
     createdAt: datetime
     updatedAt: datetime
     attendees:Optional[list] = []
-    expert: Optional[list] = None
+    expert: Optional[EventCreators] = None
+    partner: Optional[EventCreators] = None
+    organization: Optional[EventCreators] = None
 
 
     class Config:
