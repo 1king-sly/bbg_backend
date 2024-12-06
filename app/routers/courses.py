@@ -182,6 +182,25 @@ async def update_course_single_module_single_user_progress(idx:NextModule,module
     if not current_user:
         raise HTTPException(status_code=404,detail="User does not exist")
 
+    current_course = prisma.course.find_first(
+        where={
+            "modules": {
+                "some": {
+                    "ModuleProgress": {
+                        "some": {
+                            "moduleId": module_id,
+                            "userId": current_user.id
+                        }
+                    }
+                }
+            }
+        },
+    )
+
+
+    if not current_course:
+        raise HTTPException(status_code=404, detail="Course not found")
+
     try:
          update_module= prisma.moduleprogress.update(
             where={
@@ -198,26 +217,13 @@ async def update_course_single_module_single_user_progress(idx:NextModule,module
     except Exception as e:
         raise HTTPException(status_code=404, detail=f"Failed to Update Module Progress at update_module: {str(e)}")
     try:
-        current_course = prisma.course.find_first(
-            where={
-                "modules":{
-                    "ModuleProgress":{
-                        "some":{
-                           "moduleId":update_module.moduleId
-                        }
 
-                    }
-                }
-            }
-        )
         next_module =  prisma.module.find_first(
             where={"courseId": current_course.id},
             skip=idx.index + 1,
-            take=1,
-            order={"id": "asc"}
+            order={"order": "asc"}
         )
         if next_module:
-            print(next_module)
             try:
                 updated_next_module = prisma.moduleprogress.update(
                     where={
@@ -232,10 +238,11 @@ async def update_course_single_module_single_user_progress(idx:NextModule,module
 
                 )
             except Exception as e:
-                raise HTTPException(status_code=404, detail=f"Failed to Update Module Progress at updated_next_module: {str(e)}")
+                raise HTTPException(status_code=404, detail=f"Failed to Update Module Progress at : {str(e)}")
 
     except Exception as e:
-        next_module = None
+        raise HTTPException(status_code=404,
+                            detail=f"Failed to Update Module Progress at next_module: {str(e)}")
 
     return {
         "updatedModule": update_module,
