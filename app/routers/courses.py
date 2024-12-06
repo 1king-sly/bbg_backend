@@ -131,7 +131,8 @@ async def list_courses_enrolled_by_me(current_user = Depends(get_current_user)):
                         "include": {
                             "questions": True
                         }
-                    }
+                    },
+                    "ModuleProgress":True
                 }
             },
         "enrollments":True,
