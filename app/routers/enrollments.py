@@ -133,6 +133,7 @@ async def delete_expert(current_user=Depends(get_current_user)):
         raise HTTPException(status_code=403, detail="Not authorized")
     try:
         deleted_event =  prisma.enrollment.delete_many()
+        prisma.moduleprogress.delete_many()
         return deleted_event
 
     except Exception as e:

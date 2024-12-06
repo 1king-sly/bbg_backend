@@ -346,4 +346,6 @@ class ModuleProgressResponse(BaseModel):
         from_attributes = True
 
 
+class NextModule(BaseModel):
+    index:int
 

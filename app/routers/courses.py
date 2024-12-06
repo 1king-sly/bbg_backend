@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
 from app.src.auth.auth import get_current_user
-from app.src.models.schemas import CourseCreate, CourseResponse, ModuleResponse
+from app.src.models.schemas import CourseCreate, CourseResponse, ModuleResponse, NextModule
 from db import prisma
 
 router = APIRouter()
@@ -176,6 +176,71 @@ async def read_course_single_module(module_id: str):
         raise HTTPException(status_code=404, detail="Module not found")
     return module
 
+@router.patch("/modules/{module_id}")
+async def update_course_single_module_single_user_progress(idx:NextModule,module_id: str,current_user = Depends(get_current_user)):
+
+    if not current_user:
+        raise HTTPException(status_code=404,detail="User does not exist")
+
+    try:
+         update_module= prisma.moduleprogress.update(
+            where={
+                    "userId_moduleId": {
+                    "userId": current_user.id,
+                    "moduleId": module_id
+                }
+            },
+            data={
+                    "isCompleted": True
+            }
+        )
+
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=f"Failed to Update Module Progress at update_module: {str(e)}")
+    try:
+        current_course = prisma.course.find_first(
+            where={
+                "modules":{
+                    "ModuleProgress":{
+                        "some":{
+                           "moduleId":update_module.moduleId
+                        }
+
+                    }
+                }
+            }
+        )
+        next_module =  prisma.module.find_first(
+            where={"courseId": current_course.id},
+            skip=idx.index + 1,
+            take=1,
+            order={"id": "asc"}
+        )
+        if next_module:
+            print(next_module)
+            try:
+                updated_next_module = prisma.moduleprogress.update(
+                    where={
+                       "userId_moduleId": {
+                            "userId": current_user.id,
+                            "moduleId": next_module.id
+                        }
+                    },
+                    data={
+                        "isLocked":False
+                    }
+
+                )
+            except Exception as e:
+                raise HTTPException(status_code=404, detail=f"Failed to Update Module Progress at updated_next_module: {str(e)}")
+
+    except Exception as e:
+        next_module = None
+
+    return {
+        "updatedModule": update_module,
+        "nextModule": next_module
+    }
 @router.put("/{course_id}", response_model=CourseResponse)
 async def update_course(
     course_id: int,
