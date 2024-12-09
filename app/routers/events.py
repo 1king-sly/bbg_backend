@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from typing import List
 from app.src.auth.auth import get_current_user
-from app.src.models.schemas import EventCreate, Event, EventUpdate
+from app.src.models.schemas import EventCreate, Event, EventUpdate, EventBase
 from db import prisma
 from datetime import datetime
 
@@ -145,7 +145,7 @@ async def register_for_event(event_id: int, current_user = Depends(get_current_u
 @router.put("/{event_id}", response_model=Event)
 async def update_event(
         event_id: int,
-        event_update: EventUpdate,
+        event_update: EventBase,
         current_user=Depends(get_current_user)
 ):
 
@@ -153,8 +153,8 @@ async def update_event(
     if not event:
         raise HTTPException(status_code=404, detail="Event not found")
 
-    if current_user.role != "ADMIN" and event.expertId != current_user.id:
-        raise HTTPException(status_code=403, detail="Not authorized")
+    # if current_user.role != "ADMIN" and event.expertId != current_user.id:
+    #     raise HTTPException(status_code=403, detail="Not authorized")
 
     try:
         updated_event =  prisma.event.update(
