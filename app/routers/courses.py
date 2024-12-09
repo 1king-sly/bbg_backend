@@ -138,7 +138,10 @@ async def list_courses_enrolled_by_me(current_user = Depends(get_current_user)):
         "enrollments":True,
     })
 @router.get("/{course_id}", response_model=CourseResponse)
-async def read_course(course_id: str):
+async def read_course(course_id: str,current_user = Depends(get_current_user)):
+
+    if not current_user:
+        raise HTTPException(status_code=400, detail="Bad request, access token missing or expired")
     course =  prisma.course.find_unique(
         where={"id": course_id},
         include={
@@ -150,7 +153,11 @@ async def read_course(course_id: str):
                             "questions": True
                         }
                     },
-                    "ModuleProgress":True,
+                    "ModuleProgress":{
+                        "where":{
+                        "userId": current_user.id
+                    }
+                    },
                     "progress":True,
                 }
             },
