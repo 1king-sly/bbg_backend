@@ -158,7 +158,6 @@ async def read_course(course_id: str,current_user = Depends(get_current_user)):
                         "userId": current_user.id
                     }
                     },
-                    "progress":True,
                 }
             },
         }

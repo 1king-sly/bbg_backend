@@ -10,33 +10,31 @@ datasource db {
 }
 
 model User {
-  id              Int              @id @default(autoincrement())
-  email           String           @unique
-  name            String?
-  role            Role             @default(USER)
-  phone           String?
-  dateOfBirth     DateTime?
-  isPregnant      Boolean          @default(false)
-  pregnancyDate   DateTime?
-  hasChild        Boolean          @default(false)
-  childBirthDate  DateTime?
-  childGender     String?
-  lastPeriodDate  DateTime?
-  periodEndDate   DateTime?
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  password        String
-  image           String?
-  cycleDays       Int              @default(28)
-  isMenstruating  Boolean          @default(false)
-  certificates    Certificate[]
-  enrollments     Enrollment[]
-  menstrualCycles MenstrualCycle[]
-  messages        Message[]        @relation("UserMessages")
-  ModuleProgress  ModuleProgress[]
-  QuizAttempt     QuizAttempt[]
-  sessions        Session[]        @relation("UserSessions")
-  events          Event[]          @relation("Attendees")
+  id             Int              @id @default(autoincrement())
+  email          String           @unique
+  name           String?
+  role           Role             @default(USER)
+  phone          String?
+  dateOfBirth    DateTime?
+  isPregnant     Boolean          @default(false)
+  pregnancyDate  DateTime?
+  hasChild       Boolean          @default(false)
+  childBirthDate DateTime?
+  childGender    String?
+  lastPeriodDate DateTime?
+  periodEndDate  DateTime?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  password       String
+  image          String?
+  cycleDays      Int              @default(28)
+  isMenstruating Boolean          @default(false)
+  certificates   Certificate[]
+  enrollments    Enrollment[]
+  messages       Message[]        @relation("UserMessages")
+  ModuleProgress ModuleProgress[]
+  sessions       Session[]        @relation("UserSessions")
+  events         Event[]          @relation("Attendees")
 }
 
 model Expert {
@@ -140,43 +138,27 @@ model Module {
   updatedAt      DateTime         @updatedAt
   course         Course           @relation(fields: [courseId], references: [id])
   ModuleProgress ModuleProgress[]
-  progress       Progress[]
   Quiz           Quiz?
 }
 
 model Quiz {
-  id        Int           @id @default(autoincrement())
-  moduleId  String        @unique
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
+  id        Int        @id @default(autoincrement())
+  moduleId  String     @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
   questions Question[]
-  module    Module        @relation(fields: [moduleId], references: [id])
-  attempts  QuizAttempt[]
+  module    Module     @relation(fields: [moduleId], references: [id])
 }
 
 model Question {
-  id            Int           @id @default(autoincrement())
+  id            Int      @id @default(autoincrement())
   quizId        Int
   content       String
   options       String[]
   correctAnswer Int
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  quiz          Quiz          @relation(fields: [quizId], references: [id])
-  attempts      QuizAttempt[]
-}
-
-model QuizAttempt {
-  id         Int      @id @default(autoincrement())
-  userId     Int
-  quizId     Int
-  questionId Int
-  answer     Int
-  isCorrect  Boolean
-  createdAt  DateTime @default(now())
-  question   Question @relation(fields: [questionId], references: [id])
-  quiz       Quiz     @relation(fields: [quizId], references: [id])
-  user       User     @relation(fields: [userId], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  quiz          Quiz     @relation(fields: [quizId], references: [id])
 }
 
 model ModuleProgress {
@@ -208,17 +190,6 @@ model Enrollment {
   user        User         @relation(fields: [userId], references: [id])
 
   @@unique([userId, courseId])
-}
-
-model Progress {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  moduleId  String
-  completed Boolean  @default(false)
-  score     Int?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  module    Module   @relation(fields: [moduleId], references: [id])
 }
 
 model Certificate {
@@ -261,19 +232,6 @@ model Message {
   updatedAt DateTime @updatedAt
   sender    User     @relation("UserMessages", fields: [senderId], references: [id])
   session   Session? @relation("SessionMessages", fields: [sessionId], references: [id])
-}
-
-model MenstrualCycle {
-  id              Int       @id @default(autoincrement())
-  userId          Int
-  startDate       DateTime
-  expectedEndDate DateTime
-  actualEndDate   DateTime?
-  symptoms        String?
-  notes           String?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  user            User      @relation(fields: [userId], references: [id])
 }
 
 enum Role {
