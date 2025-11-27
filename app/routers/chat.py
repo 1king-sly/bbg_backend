@@ -27,7 +27,7 @@ async def chat(request:ChatRequest):
         full_message = f"{context}\nUser: {request.message}\nAI:"
 
         # Call Gemini API to generate the response
-        model = genai.GenerativeModel("gemini-1.5-flash")
+        model = genai.GenerativeModel("gemini-2.0-flash")
         response = model.generate_content(full_message)
 
         # Return the generated response text
